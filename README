@@ -1,0 +1,6 @@
+prereq:
+
+% brew install swi-prolog
+
+it was tested on swipl 5.11.x, hope it works w/ 6.x
+
