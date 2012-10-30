@@ -230,5 +230,8 @@ test(trans_arity1_meth_nested_arg, [nondet]) :-
 test(trans_arity2_meth, [nondet]) :-
   S="[foo bar:1 baz:2]",
   phrase(exp(P), S), trans(P,"", "foo.bar(1, baz:2)").
+test(trans_arity3_meth_nested_all_args, [nondet]) :-
+  S="[foo bar:[x y:1] baz:[a b:2] gdc:[foo x:1]]",
+  phrase(exp(P), S), trans(P,"", "foo.bar(x.y(1)), baz:a.b(2), gdc:foo.x(1))").
 :- end_tests(trans).
 
