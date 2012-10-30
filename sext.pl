@@ -54,7 +54,7 @@ msg(msg(sender(X), meth(M))) -->
 exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> msg(V).
-exp([]) --> [].
+exp(V) --> blank, blanks, exp(V).
 
 
 %% translator
@@ -103,6 +103,7 @@ test(message_meth_arg_nesting, [nondet]) :-
            "[foo quux: [bar foo] zzz:[xxx yyy]]").
 test(disallow_empty_sender, [fail]) :-
     phrase(exp(msg(_,_)), "[foo]").
-
+test(allow_blanks_before_exp, [nondet]) :-
+    phrase(exp(msg(sender(msg(_,_)), _)), " [  [foo z] x ]").
 
 :- end_tests(messages).
