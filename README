@@ -2,5 +2,4 @@ prereq:
 
 % brew install swi-prolog
 
-it was tested on swipl 5.11.x, hope it works w/ 6.x
-
+it needs to be 6.x for apply:foldl
