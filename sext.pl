@@ -76,6 +76,7 @@ stmt(asgn(dest(D),val(V))) -->
 %% translator
 
 
+
 %% test
 ex1(S) :- S="[Foo alloc]".
 ex2(S) :- S="[[PhotoPickerController alloc] init]".
@@ -134,6 +135,9 @@ test(allow_blanks_before_exp, [nondet]) :-
 test(method_arg_in_parens, [nondet]) :-
     phrase(exp(msg(_, meth([arg(_, val(const(num(42))))]))),
            "[foo quux:(42)]").
+test(method_with_nonzero_arity_should_have_all_args_with_values, [fail, fixme(in_the_future)]) :-
+  phrase(exp(msg(_,_)),
+    "[[obiekt dupa] bla foo: bar xxx]").
 test(attr1, [nondet]) :-
     phrase(exp(attr(_)),
            "foo.bar").
