@@ -35,7 +35,7 @@ ident_c(C) --> [C], {code_type(C, alnum)}.
 ident_c('_') --> "_".
 
 ident([H|T]) --> ident_c(H), ident(T).
-ident([H]) --> [H].
+ident([C]) --> ident_c(C).
 
 %% parser
 
@@ -48,7 +48,7 @@ meth([A]) --> meth_arg(A).
 meth([H|T]) --> meth_arg(H), blank, blanks, meth(T).
 
 msg(msg(sender(X), meth(M))) -->
-    "[", exp(X), {X\=[]}, blank, blanks, meth(M), "]".
+    "[", exp(X), {X\=[]}, blank, blanks, meth(M), blanks, "]".
     
 
 attr_exp([X]) --> var(X).
@@ -83,6 +83,8 @@ test(ex3, [nondet]) :- ex3(S), phrase(stmt(msg(_,_)), S).
 test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_)), S).
 test(disallow_empty_ident, [fail]) :-
     phrase(ident(_), "").
+test(disallow_ident_ending_with_blank, [fail]) :-
+    phrase(ident(_), "foo ").
 test(disallow_empty_var, [fail]) :-
     phrase(exp(var(_)), "").
 test(disallow_empty_method_name, [fail]) :-
