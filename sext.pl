@@ -72,6 +72,8 @@ ex4(S) :- S="self.photoPickerController = [[[PhotoPickerController alloc] initWi
 
 :- begin_tests(messages).
 
+test(ex1, [nondet]) :- ex1(S), phrase(exp(msg(_,_)), S).
+test(ex2, [nondet]) :- ex2(S), phrase(exp(msg(_,_)), S).
 test(disallow_empty_ident, [fail]) :-
     phrase(ident(_), "").
 test(disallow_empty_var, [fail]) :-
