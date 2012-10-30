@@ -54,7 +54,7 @@ meth_arg(arg(name(N),val(V))) --> ident(N), ":", blanks, exp(V).
 meth([A]) --> meth_arg(A).
 meth([H|T]) --> meth_arg(H), blanks1, meth(T).
 
-msg(msg(sender(X), meth(M))) -->
+msg(msg(rcv(X), meth(M))) -->
     "[", exp(X), {X\=[]}, blanks1, meth(M), blanks, "]".
     
 
@@ -98,7 +98,7 @@ test(disallow_empty_method_name, [fail]) :-
     phrase(exp(msg(_, meth([ arg(name([]),_) ]))), "[foo ]").
 test(arity0_message, [nondet]) :-
     phrase(exp(
-               msg(sender(_),
+               msg(rcv(_),
                    meth( [ arg(name("alloc"), noval) ] ))
               ),
            "[foo alloc]").
@@ -108,29 +108,29 @@ test(arity1_message, [nondet]) :-
 test(arity2_message, [nondet]) :-
     phrase(exp(msg(_,_)),
            "[foo bar:42 quux:23]").
-test(message_sender_nesting, [nondet]) :-
+test(message_rcv_nesting, [nondet]) :-
     phrase(exp(
-               msg(sender(msg(sender("foo"), meth( [ arg(_, noval) ] ))),
+               msg(rcv(msg(rcv("foo"), meth( [ arg(_, noval) ] ))),
                    meth(_)
                   )),
            "[[foo bar] quux:1 boo: 2]").
 test(message_meth_arg_nesting, [nondet]) :-
     phrase(exp(
-               msg(sender("foo"),
+               msg(rcv("foo"),
                    meth([
                          arg(name("quux"), val( msg(_,_) )),
                          arg(name("zzz"),  val( msg(_,_) ))
                         ])
                   )),
            "[foo quux: [bar foo] zzz:[xxx yyy]]").
-test(disallow_empty_sender, [fail]) :-
+test(disallow_empty_rcv, [fail]) :-
     phrase(exp(msg(_,_)), "[foo]").
 test(allow_1char_idents, [nondet]) :-
     phrase(ident("x"), "x").
 test(disallow_digit_at_start_of_ident, [fail]) :-
     phrase(ident(_), "1foo").
 test(allow_blanks_before_exp, [nondet]) :-
-    phrase(exp(msg(sender(msg(_,_)), _)), " [  [foo z] x ]").
+    phrase(exp(msg(rcv(msg(_,_)), _)), " [  [foo z] x ]").
 test(method_arg_in_parens, [nondet]) :-
     phrase(exp(msg(_, meth([arg(_, val(const(num(42))))]))),
            "[foo quux:(42)]").
