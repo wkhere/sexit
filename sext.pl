@@ -60,6 +60,10 @@ exp(V) --> msg(V).
 exp(attr(V)) --> attr_exp(V).
 exp(V) --> blank, blanks, exp(V).
 
+stmt(V) --> msg(V), ";".
+stmt(asgn(dest(D),val(V))) -->
+    attr_exp(D), blanks, "=", exp(V), blanks, ";".
+
 
 %% translator
 
@@ -74,6 +78,8 @@ ex4(S) :- S="self.photoPickerController = [[[PhotoPickerController alloc] initWi
 
 test(ex1, [nondet]) :- ex1(S), phrase(exp(msg(_,_)), S).
 test(ex2, [nondet]) :- ex2(S), phrase(exp(msg(_,_)), S).
+test(ex3, [nondet]) :- ex3(S), phrase(stmt(msg(_,_)), S).
+test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_)), S).
 test(disallow_empty_ident, [fail]) :-
     phrase(ident(_), "").
 test(disallow_empty_var, [fail]) :-
