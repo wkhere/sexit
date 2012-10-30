@@ -210,11 +210,17 @@ test(trans_attr, [nondet]) :-
 test(trans_arity0_meth, [nondet]) :-
   S="[xxx zzz]", 
   phrase(exp(P), S), trans(P,"", "xxx.zzz").
-test(trans_arity0_meth_nested, [nondet]) :-
+test(trans_arity0_meth_nested_receiver, [nondet]) :-
   S="[[xxx yyy] zzz]", 
   phrase(exp(P), S), trans(P, "", "xxx.yyy.zzz").
 test(trans_arity1_meth, [nondet]) :-
   S="[xxx yyy:42]",
   phrase(exp(P), S), trans(P,"", "xxx.yyy(42)").
+test(trans_arity1_meth_nested_receiver, [nondet]) :-
+  S="[[xxx yyy] zzz:42]", 
+  phrase(exp(P), S), trans(P, "", "xxx.yyy.zzz(42)").
+test(trans_arity1_meth_nested_arg, [nondet]) :-
+  S="[xxx yyy:[bar foo]]",
+  phrase(exp(P), S), trans(P,"", "xxx.yyy(bar.foo)").
 :- end_tests(trans).
 
