@@ -101,13 +101,23 @@ trans(msg(rcv(Rcv), meth( [arg(name(MethName),noval)] )), S0, SAll) :-
   string_to_list(S,L),
   append(S0, L, SAll).
 trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
+  %% arity>0 case; please note that while parser currently allows bad objc form where 
+  %% noval method arg is at any position (like "[rcv foo:bar baz]"),
+  %% we do not catch such case here so it will not be translated
   L=[LH|LT],
-  LH= arg(name(MethName),_Val),
+  %%writef('*1 %t\n',[L]),
+  LH= arg(name(MethName),val(Val1)),
+  %%writef('*2 %t\n',[Val1]),
   trans(Rcv, "", SRcv),
-  %%findall(Arg, member(arg), 
-  swritef(S, '%s.%s(...)', [SRcv, MethName]),
-  string_to_list(S,L),
-  append(S0, L, SAll).
+  %%writef('*3 %t\n',[Val1]),
+  trans(Val1, "", SVal1),
+  %%writef('*4 %t\n',[SVal1]),
+    %%findall(Arg, member(arg), 
+  swritef(S, '%s.%s(%s)', [SRcv, MethName, SVal1]),
+  %%writef('*5 %t\n',[S]),
+  string_to_list(S,L1),
+  %%writef('*6 %t\n',[L1]),
+  append(S0, L1, SAll).
 
 %% test
 
@@ -203,5 +213,8 @@ test(trans_arity0_meth, [nondet]) :-
 test(trans_arity0_meth_nested, [nondet]) :-
   S="[[xxx yyy] zzz]", 
   phrase(exp(P), S), trans(P, "", "xxx.yyy.zzz").
+test(trans_arity1_meth, [nondet]) :-
+  S="[xxx yyy:42]",
+  phrase(exp(P), S), trans(P,"", "xxx.yyy(42)").
 :- end_tests(trans).
 
