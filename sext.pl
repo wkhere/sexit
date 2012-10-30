@@ -1,6 +1,6 @@
 %%-*-prolog-*-
 %%
-%% Seductively Efficient Xenophobic Translator [of objective-c to ruby]
+%% Seductively Efficient Xenophilic Translator [of objective-c to ruby]
 %% (c) 2012 Wojciech Kaczmarek frk@wisdio.com
 %
 :- use_module(library(http/dcg_basics)).
