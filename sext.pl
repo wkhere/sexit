@@ -94,11 +94,17 @@ trans(attr(L), S0, SAll) :-
   append(S0, S, SAll).
 
 
+trans(msg(rcv(Rcv), meth( [arg(name(MethName),noval)] )), S0, SAll) :-
+  %% arity0 case
+  trans(Rcv, "", SRcv),
+  swritef(S, '%s.%s', [SRcv, MethName]),
+  string_to_list(S,L),
+  append(S0, L, SAll).
 trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
   L=[LH|LT],
   LH= arg(name(MethName),_Val),
   trans(Rcv, "", SRcv),
-
+  %%findall(Arg, member(arg), 
   swritef(S, '%s.%s(...)', [SRcv, MethName]),
   string_to_list(S,L),
   append(S0, L, SAll).
@@ -191,5 +197,11 @@ test(trans_int_const, [nondet]) :-
 test(trans_attr, [nondet]) :-
   S="foo.bar.quux", 
   phrase(exp(P), S), trans(P,"",S).
+test(trans_arity0_meth, [nondet]) :-
+  S="[xxx zzz]", 
+  phrase(exp(P), S), trans(P,"", "xxx.zzz").
+test(trans_arity0_meth_nested, [nondet]) :-
+  S="[[xxx yyy] zzz]", 
+  phrase(exp(P), S), trans(P, "", "xxx.yyy.zzz").
 :- end_tests(trans).
 
