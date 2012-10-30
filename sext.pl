@@ -39,7 +39,7 @@ ident([]) --> [].
 
 %% parser
 
-var(V) --> ident(V).
+var(V) --> ident(V), {V\=[]}.
 
 meth_arg(arg(name(N),noval)) --> ident(N).
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", blanks, exp(V).
@@ -68,6 +68,8 @@ ex4(S) :- S="self.photoPickerController = [[[PhotoPickerController alloc] initWi
 
 :- begin_tests(messages).
 
+test(disallow_empty_var, [fail]) :-
+    phrase(exp(var(_)), "").
 test(arity0_message, [nondet]) :-
     phrase(exp(
                msg(sender(_),
