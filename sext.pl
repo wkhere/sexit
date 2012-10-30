@@ -42,6 +42,8 @@ ident([H|T]) --> ident_c1(H), ident2(T).
 ident2([C]) --> ident_c(C).
 ident2([H|T]) --> ident_c(H), ident2(T).
 
+blanks1 --> blank, blanks.
+
 %% parser
 
 var(V) --> ident(V).
@@ -50,10 +52,10 @@ meth_arg(arg(name(N),noval)) --> ident(N).
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", blanks, exp(V).
 
 meth([A]) --> meth_arg(A).
-meth([H|T]) --> meth_arg(H), blank, blanks, meth(T).
+meth([H|T]) --> meth_arg(H), blanks1, meth(T).
 
 msg(msg(sender(X), meth(M))) -->
-    "[", exp(X), {X\=[]}, blank, blanks, meth(M), blanks, "]".
+    "[", exp(X), {X\=[]}, blanks1, meth(M), blanks, "]".
     
 
 attr_exp([X]) --> var(X).
