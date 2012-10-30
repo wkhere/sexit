@@ -78,25 +78,13 @@ stmt(asgn(dest(D),val(V))) -->
 
 
 %% test
+
+:- begin_tests(messages).
 ex1(S) :- S="[Foo alloc]".
 ex2(S) :- S="[[PhotoPickerController alloc] init]".
 ex3(S) :- S="[[[PhotoPickerController alloc] initWithDelegate:self] autorelease];".
 ex4(S) :- S="self.photoPickerController = [[[PhotoPickerController alloc] initWithDelegate:self] autorelease];".
 
-:- begin_tests(messages).
-
-test(ex1, [nondet]) :- ex1(S), phrase(exp(msg(_,_)), S).
-test(ex2, [nondet]) :- ex2(S), phrase(exp(msg(_,_)), S).
-test(ex3, [nondet]) :- ex3(S), phrase(stmt(msg(_,_)), S).
-test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_)), S).
-test(disallow_empty_ident, [fail]) :-
-    phrase(ident(_), "").
-test(disallow_ident_ending_with_blank, [fail]) :-
-    phrase(ident(_), "foo ").
-test(disallow_empty_var, [fail]) :-
-    phrase(exp(var(_)), "").
-test(disallow_empty_method_name, [fail]) :-
-    phrase(exp(msg(_, meth([ arg(name([]),_) ]))), "[foo ]").
 test(arity0_message, [nondet]) :-
     phrase(exp(
                msg(rcv(_),
@@ -124,6 +112,29 @@ test(message_meth_arg_nesting, [nondet]) :-
                         ])
                   )),
            "[foo quux: [bar foo] zzz:[xxx yyy]]").
+:- end_tests(messages).
+
+:- begin_tests(attrs).
+
+test(attr1, [nondet]) :-
+    phrase(exp(attr(_)),
+           "foo.bar").
+test(attr2, [nondet]) :-
+    phrase(exp(attr(L)),
+           "foo.bar.quux"),
+    nth1(2, L, "bar").
+:- end_tests(attrs).
+
+:- begin_tests(corner_cases).
+
+test(disallow_empty_ident, [fail]) :-
+    phrase(ident(_), "").
+test(disallow_ident_ending_with_blank, [fail]) :-
+    phrase(ident(_), "foo ").
+test(disallow_empty_var, [fail]) :-
+    phrase(exp(var(_)), "").
+test(disallow_empty_method_name, [fail]) :-
+    phrase(exp(msg(_, meth([ arg(name([]),_) ]))), "[foo ]").
 test(disallow_empty_rcv, [fail]) :-
     phrase(exp(msg(_,_)), "[foo]").
 test(allow_1char_idents, [nondet]) :-
@@ -138,12 +149,5 @@ test(method_arg_in_parens, [nondet]) :-
 test(method_with_nonzero_arity_should_have_all_args_with_values, [fail, fixme(in_the_future)]) :-
   phrase(exp(msg(_,_)),
     "[[obiekt dupa] bla foo: bar xxx]").
-test(attr1, [nondet]) :-
-    phrase(exp(attr(_)),
-           "foo.bar").
-test(attr2, [nondet]) :-
-    phrase(exp(attr(L)),
-           "foo.bar.quux"),
-    nth1(2, L, "bar").
+:- end_tests(corner_cases).
 
-:- end_tests(messages).
