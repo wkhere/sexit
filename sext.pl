@@ -48,7 +48,7 @@ meth([A]) --> meth_arg(A).
 meth([H|T]) --> meth_arg(H), blank, blanks, meth(T).
 
 msg(msg(sender(X), meth(M))) -->
-    "[", exp(X), blank, blanks, meth(M), "]".
+    "[", exp(X), {X\=[]}, blank, blanks, meth(M), "]".
     
 
 exp(V) --> const(V).
@@ -95,5 +95,8 @@ test(message_meth_arg_nesting, [nondet]) :-
                         ])
                   )),
            "[foo quux: [bar foo] zzz:[xxx yyy]]").
+test(disallow_empty_sender, [fail]) :-
+    phrase(exp(msg(_,_)), "[foo]").
+
 
 :- end_tests(messages).
