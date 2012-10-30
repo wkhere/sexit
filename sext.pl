@@ -48,7 +48,7 @@ blanks1 --> blank, blanks.
 
 %% parser
 
-var(V) --> ident(V).
+var(ident(V)) --> ident(V).
 
 meth_arg(arg(name(N),noval)) --> ident(N).
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", blanks, exp(V).
@@ -77,7 +77,22 @@ stmt(asgn(dest(D),val(V))) -->
 
 %% translator
 
+trans(const(C), S0, SAll) :-
+  C =.. [_Type, V],
+  swritef(S, '%t', [V]), string_to_list(S,L),
+  append(S0, L, SAll).
+trans(ident(V), S0, SAll) :-
+  append(S0,V,SAll).
+%%trans(attr(L), SAll) :-
 
+trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
+  L=[LH|LT],
+  LH= arg(name(MethName),_Val),
+  trans(Rcv, "", SRcv),
+
+  swritef(S, '%s.%s(...)', [SRcv, MethName]),
+  string_to_list(S,L),
+  append(S0, L, SAll).
 
 %% test
 
@@ -101,13 +116,13 @@ test(arity2_message, [nondet]) :-
            "[foo bar:42 quux:23]").
 test(message_rcv_nesting, [nondet]) :-
     phrase(exp(
-               msg(rcv(msg(rcv("foo"), meth( [ arg(_, noval) ] ))),
+               msg(rcv(msg(rcv(ident("foo")), meth( [ arg(_, noval) ] ))),
                    meth(_)
                   )),
            "[[foo bar] quux:1 boo: 2]").
 test(message_meth_arg_nesting, [nondet]) :-
     phrase(exp(
-               msg(rcv("foo"),
+               msg(rcv(ident("foo")),
                    meth([
                          arg(name("quux"), val( msg(_,_) )),
                          arg(name("zzz"),  val( msg(_,_) ))
@@ -124,7 +139,7 @@ test(attr1, [nondet]) :-
 test(attr2, [nondet]) :-
     phrase(exp(attr(L)),
            "foo.bar.quux"),
-    nth1(2, L, "bar").
+    nth1(2, L, ident("bar")).
 :- end_tests(attrs).
 
 :- begin_tests(corner_cases).
@@ -152,4 +167,14 @@ test(method_with_nonzero_arity_should_have_all_args_with_values, [fail, fixme(in
   phrase(exp(msg(_,_)),
     "[[obiekt dupa] bla foo: bar xxx]").
 :- end_tests(corner_cases).
+
+:- begin_tests(trans).
+test(trans_var, [nondet]) :-
+  S="foo",
+  phrase(exp(P), S), trans(P,"",S).
+test(trans_int_const, [nondet]) :-
+  S="42", 
+  phrase(exp(P), S), trans(P,"",S).
+
+:- end_tests(trans).
 
