@@ -13,6 +13,10 @@ list_to_dl(S,DL-E) :- append(S,E,DL).
 
 empty_dl(H-T) :- unify_with_occurs_check(H,T).
 
+%% code_list join
+join(_Delim, [H], H).
+join(Delim,  [H|T], Acc) :- join(Delim,T,S), append(H,Delim,S1), append(S1,S,Acc).
+
 %% lexer
 
 dquote --> "\"".
@@ -77,13 +81,18 @@ stmt(asgn(dest(D),val(V))) -->
 
 %% translator
 
+
 trans(const(C), S0, SAll) :-
   C =.. [_Type, V],
   swritef(S, '%t', [V]), string_to_list(S,L),
   append(S0, L, SAll).
 trans(ident(V), S0, SAll) :-
   append(S0,V,SAll).
-%%trans(attr(L), SAll) :-
+trans(attr(L), S0, SAll) :-
+  findall(I, member(ident(I),L), Is),
+  join(".", Is, S),
+  append(S0, S, SAll).
+
 
 trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
   L=[LH|LT],
@@ -175,6 +184,8 @@ test(trans_var, [nondet]) :-
 test(trans_int_const, [nondet]) :-
   S="42", 
   phrase(exp(P), S), trans(P,"",S).
-
+test(trans_attr, [nondet]) :-
+  S="foo.bar.quux", 
+  phrase(exp(P), S), trans(P,"",S).
 :- end_tests(trans).
 
