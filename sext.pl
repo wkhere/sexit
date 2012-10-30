@@ -238,3 +238,8 @@ test(trans_arity3_meth_nested_all_args, [nondet]) :-
   phrase(exp(P), S), trans(P,"", "foo.bar(x.y(1), baz:a.b(2), gdc:foo.x(1))").
 :- end_tests(trans).
 
+%% run
+
+repl :- run_tests.
+start :- true.
+main(_) :- start.

@@ -1,5 +1,13 @@
-prereq:
-
+prereq
+======
 % brew install swi-prolog
 
 it needs to be 6.x for apply:foldl
+
+
+make targets
+============
+
+% make          # compiles to exec, entry point: main/1
+% make run      # runs interpreted code and exits, entry point: start/0
+% make repl     # loads code, runs repl/1 hook and stays in the repl
