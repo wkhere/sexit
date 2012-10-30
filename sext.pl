@@ -31,11 +31,16 @@ split_with1(_Delimiter, []) --> [].
 const(const(num(V))) --> number(V).
 const(const(str(S))) --> dquote, string_without("\"",S), dquote.
 
+ident_c1(C) --> [C], {code_type(C, alpha)}.
+ident_c1('_') --> "_".
+
 ident_c(C) --> [C], {code_type(C, alnum)}.
 ident_c('_') --> "_".
 
-ident([H|T]) --> ident_c(H), ident(T).
-ident([C]) --> ident_c(C).
+ident([C]) --> ident_c1(C).     % this way ident can be '_' - bit ugly
+ident([H|T]) --> ident_c1(H), ident2(T).
+ident2([C]) --> ident_c(C).
+ident2([H|T]) --> ident_c(H), ident2(T).
 
 %% parser
 
@@ -118,6 +123,10 @@ test(message_meth_arg_nesting, [nondet]) :-
            "[foo quux: [bar foo] zzz:[xxx yyy]]").
 test(disallow_empty_sender, [fail]) :-
     phrase(exp(msg(_,_)), "[foo]").
+test(allow_1char_idents, [nondet]) :-
+    phrase(ident("x"), "x").
+test(disallow_digit_at_start_of_ident, [fail]) :-
+    phrase(ident(_), "1foo").
 test(allow_blanks_before_exp, [nondet]) :-
     phrase(exp(msg(sender(msg(_,_)), _)), " [  [foo z] x ]").
 test(method_arg_in_parens, [nondet]) :-
