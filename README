@@ -9,5 +9,5 @@ make targets
 ============
 
 % make          # compiles to exec, entry point: main/1
-% make run      # runs interpreted code and exits, entry point: start/0
+% make run      # as above plus runs the exec
 % make repl     # loads code, runs repl/1 hook and stays in the repl
