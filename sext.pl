@@ -42,7 +42,7 @@ ident([]) --> [].
 var(V) --> ident(V).
 
 meth_arg(arg(name(N),noval)) --> ident(N).
-meth_arg(arg(name(N),val(V))) --> ident(N), ":", blanks, const(V).
+meth_arg(arg(name(N),val(V))) --> ident(N), ":", blanks, exp(V).
 
 meth([A]) --> meth_arg(A).
 meth([H|T]) --> meth_arg(H), blank, blanks, meth(T).
@@ -86,5 +86,14 @@ test(message_sender_nesting, [nondet]) :-
                    meth(_)
                   )),
            "[[foo bar] quux:1 boo: 2]").
+test(message_meth_arg_nesting, [nondet]) :-
+    phrase(exp(
+               msg(sender("foo"),
+                   meth([
+                         arg(name("quux"), val( msg(_,_) )),
+                         arg(name("zzz"),  val( msg(_,_) ))
+                        ])
+                  )),
+           "[foo quux: [bar foo] zzz:[xxx yyy]]").
 
 :- end_tests(messages).
