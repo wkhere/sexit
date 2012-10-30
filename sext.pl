@@ -51,9 +51,13 @@ msg(msg(sender(X), meth(M))) -->
     "[", exp(X), {X\=[]}, blank, blanks, meth(M), "]".
     
 
+attr_exp([X]) --> var(X).
+attr_exp([H|T]) --> var(H), ".", attr_exp(T).
+
 exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> msg(V).
+exp(attr(V)) --> attr_exp(V).
 exp(V) --> blank, blanks, exp(V).
 
 
@@ -105,5 +109,12 @@ test(disallow_empty_sender, [fail]) :-
     phrase(exp(msg(_,_)), "[foo]").
 test(allow_blanks_before_exp, [nondet]) :-
     phrase(exp(msg(sender(msg(_,_)), _)), " [  [foo z] x ]").
+test(attr1, [nondet]) :-
+    phrase(exp(attr(_)),
+           "foo.bar").
+test(attr2, [nondet]) :-
+    phrase(exp(attr(L)),
+           "foo.bar.quux"),
+    nth1(2, L, "bar").
 
 :- end_tests(messages).
