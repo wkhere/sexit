@@ -80,7 +80,7 @@ test(arity1_message, [nondet]) :-
 test(arity2_message, [nondet]) :-
     phrase(exp(msg(_,_)),
            "[foo bar:42 quux:23]").
-test(message_nesting, [nondet]) :-
+test(message_sender_nesting, [nondet]) :-
     phrase(exp(
                msg(sender(msg(sender("foo"), meth( [ arg(_, noval) ] ))),
                    meth(_)
