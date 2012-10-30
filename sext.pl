@@ -11,6 +11,8 @@
 
 list_to_dl(S,DL-E) :- append(S,E,DL).
 
+empty_dl(H-T) :- unify_with_occurs_check(H,T).
+
 %% lexer
 
 dquote --> "\"".
