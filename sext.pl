@@ -39,6 +39,8 @@ ident([]) --> [].
 
 %% parser
 
+var(V) --> ident(V).
+
 meth_arg(arg(name(N),noval)) --> ident(N).
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", blanks, const(V).
 
@@ -49,7 +51,8 @@ msg(msg(sender(X), meth(M))) -->
     "[", exp(X), blank, blanks, meth(M), "]".
     
 
-exp(V) --> ident(V).
+exp(V) --> const(V).
+exp(V) --> var(V).
 exp(V) --> msg(V).
 exp([]) --> [].
 
