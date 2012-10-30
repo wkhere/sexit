@@ -58,6 +58,7 @@ exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> msg(V).
 exp(attr(V)) --> attr_exp(V).
+exp(V) --> "(", exp(V), ")".
 exp(V) --> blank, blanks, exp(V).
 
 stmt(V) --> msg(V), ";".
@@ -117,6 +118,9 @@ test(disallow_empty_sender, [fail]) :-
     phrase(exp(msg(_,_)), "[foo]").
 test(allow_blanks_before_exp, [nondet]) :-
     phrase(exp(msg(sender(msg(_,_)), _)), " [  [foo z] x ]").
+test(method_arg_in_parens, [nondet]) :-
+    phrase(exp(msg(_, meth([arg(_, val(const(num(42))))]))),
+           "[foo quux:(42)]").
 test(attr1, [nondet]) :-
     phrase(exp(attr(_)),
            "foo.bar").
