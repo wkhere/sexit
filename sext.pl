@@ -82,6 +82,13 @@ stmt(asgn(dest(D),val(V))) -->
 %% translator
 
 
+foldl_pred_example((N,SV), ([],[]), ([N],[SV])).
+foldl_pred_example((N,SV), ([H1|T1],[H2|T2]), ( [H1|[N|T1]], [H2|[SV|T2]] ) ).
+%% usage: foldl(foldl_pred_example,  [(1,a), (2,b)],  ([],[]),  V).
+
+fold_args((N,SV), "", Acc) :- swritef(Buf, '%s:%s', [N,SV]), string_to_list(Buf, Acc).
+fold_args((N,SV), L0, Acc) :- swritef(Buf, ', %s:%s', [N,SV]), string_to_list(Buf, L1), append(L0,L1, Acc).
+
 trans(const(C), S0, SAll) :-
   C =.. [_Type, V],
   swritef(S, '%t', [V]), string_to_list(S,L),
@@ -92,7 +99,6 @@ trans(attr(L), S0, SAll) :-
   findall(I, member(ident(I),L), Is),
   join(".", Is, S),
   append(S0, S, SAll).
-
 
 trans(msg(rcv(Rcv), meth( [arg(name(MethName),noval)] )), S0, SAll) :-
   %% arity0 case
@@ -105,18 +111,17 @@ trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
   %% noval method arg is at any position (like "[rcv foo:bar baz]"),
   %% we do not catch such case here so it will not be translated
   L=[LH|LT],
-  %%writef('*1 %t\n',[L]),
   LH= arg(name(MethName),val(Val1)),
-  %%writef('*2 %t\n',[Val1]),
   trans(Rcv, "", SRcv),
-  %%writef('*3 %t\n',[Val1]),
   trans(Val1, "", SVal1),
-  %%writef('*4 %t\n',[SVal1]),
-    %%findall(Arg, member(arg), 
-  swritef(S, '%s.%s(%s)', [SRcv, MethName, SVal1]),
-  %%writef('*5 %t\n',[S]),
+  ( LT==[] ->
+    swritef(S, '%s.%s(%s)', [SRcv, MethName, SVal1])
+  ; 
+    findall((N,SV), (member(arg(name(N),val(V)), LT), trans(V,"",SV)), RestArgs),
+    foldl(fold_args, RestArgs, "", SVals2Plus),
+    swritef(S, '%s.%s(%s, %s)', [SRcv, MethName, SVal1, SVals2Plus])
+  ),
   string_to_list(S,L1),
-  %%writef('*6 %t\n',[L1]),
   append(S0, L1, SAll).
 
 %% test
@@ -222,5 +227,8 @@ test(trans_arity1_meth_nested_receiver, [nondet]) :-
 test(trans_arity1_meth_nested_arg, [nondet]) :-
   S="[xxx yyy:[bar foo]]",
   phrase(exp(P), S), trans(P,"", "xxx.yyy(bar.foo)").
+test(trans_arity2_meth, [nondet]) :-
+  S="[foo bar:1 baz:2]",
+  phrase(exp(P), S), trans(P,"", "foo.bar(1, baz:2)").
 :- end_tests(trans).
 
