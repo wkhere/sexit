@@ -138,6 +138,10 @@ test(message_meth_arg_nesting, [nondet]) :-
                         ])
                   )),
            "[foo quux: [bar foo] zzz:[xxx yyy]]").
+test(ex1, [nondet]) :- ex1(S), phrase(exp(msg(_,_)), S).
+test(ex2, [nondet]) :- ex2(S), phrase(exp(msg(_,_)), S).
+test(ex3, [nondet]) :- ex3(S), phrase(stmt(msg(_,_)), S).
+test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_)), S).
 :- end_tests(messages).
 
 :- begin_tests(attrs).
