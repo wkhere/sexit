@@ -58,19 +58,19 @@ msg(msg(sender(X), meth(M))) -->
     "[", exp(X), {X\=[]}, blanks1, meth(M), blanks, "]".
     
 
-attr_exp([X]) --> var(X).
-attr_exp([H|T]) --> var(H), ".", attr_exp(T).
+attr_var([X]) --> var(X).
+attr_var([H|T]) --> var(H), ".", attr_var(T).
 
 exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> msg(V).
-exp(attr(V)) --> attr_exp(V).
+exp(attr(V)) --> attr_var(V).
 exp(V) --> "(", exp(V), ")".
 exp(V) --> blank, blanks, exp(V).
 
 stmt(V) --> msg(V), ";".
 stmt(asgn(dest(D),val(V))) -->
-    attr_exp(D), blanks, "=", exp(V), blanks, ";".
+    attr_var(D), blanks, "=", exp(V), blanks, ";".
 
 
 %% translator
