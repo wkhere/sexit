@@ -50,6 +50,7 @@ msg(msg(sender(X), meth(M))) -->
     
 
 exp(V) --> ident(V).
+exp(V) --> msg(V).
 exp([]) --> [].
 
 
@@ -65,12 +66,22 @@ ex4(S) :- S="self.photoPickerController = [[[PhotoPickerController alloc] initWi
 :- begin_tests(messages).
 
 test(arity0_message, [nondet]) :-
-    phrase(msg(
+    phrase(exp(
                msg(sender(_),
                    meth( [ arg(name("alloc"), noval) ] ))
               ),
            "[foo alloc]").
-test(arity1_message, [nondet]) :- phrase(msg(_), "[foo bar:42]").
-test(arity2_message, [nondet]) :- phrase(msg(_), "[foo bar:42 quux:23]").
+test(arity1_message, [nondet]) :-
+    phrase(exp(msg(_,_)),
+           "[foo bar:42]").
+test(arity2_message, [nondet]) :-
+    phrase(exp(msg(_,_)),
+           "[foo bar:42 quux:23]").
+test(message_nesting, [nondet]) :-
+    phrase(exp(
+               msg(sender(msg(sender("foo"), meth( [ arg(_, noval) ] ))),
+                   meth(_)
+                  )),
+           "[[foo bar] quux:1 boo: 2]").
 
 :- end_tests(messages).
