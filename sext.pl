@@ -103,6 +103,11 @@ trans(attr(L), S0, SAll) :-
     join(".", Is, S),
     append(S0, S, SAll).
 
+trans(asgn(dest(D), val(V)), L0, Acc) :-
+    trans(attr(D), "", LD),
+    trans(V, "", LV),
+    append(L0, LD, L1), append(L1, " = ", L2), append(L2, LV, Acc).
+
 trans(msg_stmt(Msg), S0, SAll) :-
     trans(Msg, S0, SAll).
 
@@ -263,6 +268,10 @@ test(trans_ex3, [nondet]) :-
     ex3(S),
     phrase(stmt(P), S), trans(P,"", S2),
     S2="PhotoPickerController.alloc.initWithDelegate(self).autorelease".
+test(trans_ex4, [nondet]) :-
+    ex4(S),
+    phrase(stmt(P), S), trans(P,"", S2),
+    S2="self.photoPickerController = PhotoPickerController.alloc.initWithDelegate(self).autorelease".
 :- end_tests(trans).
 
 %% run
