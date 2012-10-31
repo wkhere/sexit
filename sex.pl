@@ -21,6 +21,18 @@ join( Sep, [H|T], Acc) :-
 
 append_nl(L, Acc) :- append(L, "\n", Acc).
 
+ltrim([], []).
+ltrim([H|T], Acc) :-
+	( code_type(H, space) ->
+	  ltrim(T, Acc)
+	; Acc=[H|T] ).
+
+rtrim(S, S2) :-
+	reverse(S, R),
+	ltrim(R, R2),
+	reverse(R2, S2).
+	
+
 %% lexer
 
 dquote --> "\"".
@@ -182,6 +194,13 @@ ex1(S) :- S="[Foo alloc]".
 ex2(S) :- S="[[PhotoPickerController alloc] init]".
 ex3(S) :- S="[[[PhotoPickerController alloc] initWithDelegate:self] autorelease];".
 ex4(S) :- S="self.photoPickerController = [[[PhotoPickerController alloc] initWithDelegate:self] autorelease];".
+
+:- begin_tests(utils).
+test(ltrim) :-
+	ltrim("\r\t\n \n \r \t foo ", "foo ").
+test(rtrim) :-
+	rtrim(" foo \r\t\n \n \r \t", " foo").
+:- end_tests(utils).
 
 :- begin_tests(messages).
 
