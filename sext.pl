@@ -51,20 +51,32 @@ ident([H|T]) --> ident_c1(H), ident2(T).
 ident2([C]) --> ident_c(C).
 ident2([H|T]) --> ident_c(H), ident2(T).
 
-blanks1 --> blank, blanks.
+whites1 --> white, whites.
+
+lpar --> "(", whites.
+rpar --> whites, ")".
+
+lbracket --> "[", whites.
+rbracket --> whites, "]".
+
+lf --> blanks.
+
+semicolon --> whites, ";", lf, whites.
+semicolon --> whites, ";", whites.
+sc --> semicolon.
 
 %% parser
 
 var(ident(V)) --> ident(V).
 
 meth_arg(arg(name(N),noval)) --> ident(N).
-meth_arg(arg(name(N),val(V))) --> ident(N), ":", blanks, exp(V).
+meth_arg(arg(name(N),val(V))) --> ident(N), ":", whites, exp(V).
 
 meth([A]) --> meth_arg(A).
-meth([H|T]) --> meth_arg(H), blanks1, meth(T).
+meth([H|T]) --> meth_arg(H), whites1, meth(T).
 
 msg(msg(rcv(X), meth(M))) -->
-    "[", exp(X), {X\=[]}, blanks1, meth(M), blanks, "]".
+    lbracket, exp(X), {X\=[]}, whites1, meth(M), rbracket.
 
 attr_var([X]) --> var(X).
 attr_var([H|T]) --> var(H), ".", attr_var(T).
@@ -73,13 +85,16 @@ exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> msg(V).
 exp(attr(V)) --> attr_var(V).
-exp(V) --> "(", exp(V), ")".
-exp(V) --> blank, blanks, exp(V).
+exp(V) --> lpar, exp(V), whites, rpar.
+exp(V) --> whites1, exp(V).
 
-stmt(msg_stmt(V)) --> msg(V), ";".
+stmt(msg_stmt(V)) --> msg(V), sc.
 stmt(asgn(dest(D),val(V))) -->
-    attr_var(D), blanks, "=", exp(V), blanks, ";".
+    attr_var(D), whites, "=", exp(V), sc.
+stmt(S) --> whites1, stmt(S).
 
+code([]) --> [].
+code([H|T]) --> stmt(H), stmt(T).
 
 %% translator
 
@@ -138,6 +153,8 @@ trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
     string_to_list(S,L1),
     append(S0, L1, SAll).
 
+trans(ParseTree, Acc) :- trans(ParseTree, "", Acc).
+
 %% test
 
 ex1(S) :- S="[Foo alloc]".
@@ -191,6 +208,18 @@ test(attr2, [nondet]) :-
     nth1(2, L, ident("bar")).
 :- end_tests(attrs).
 
+:- begin_tests(many_statements).
+test(two_statements, [nondet]) :-
+    S=" [foo bar]; a=3;",
+    phrase(code(_), S).
+test(two_statements_with_lfs, [nondet]) :-
+    S=" [foo bar];\n a=3;\n",
+    phrase(code(_), S).
+test(two_statements_with_many_lfs, [nondet]) :-
+    S=" [foo bar];\n\n\n a=3;\n\n",
+    phrase(code(_), S).
+:- end_tests(many_statements).
+
 :- begin_tests(corner_cases).
 
 test(disallow_empty_ident, [fail]) :-
@@ -215,6 +244,18 @@ test(method_arg_in_parens, [nondet]) :-
 test(method_with_nonzero_arity_should_have_all_args_with_values, [fail, fixme(in_the_future)]) :-
     phrase(exp(msg(_,_)),
            "[[obiekt dupa] bla foo: bar xxx]").
+test(parent_exp_with_white_left, [nondet]) :-
+    S="( 42)",
+    phrase(exp(_), S).
+test(parent_exp_with_white_right, [nondet]) :-
+    S="(42 )",
+    phrase(exp(_), S).
+test(msg_space_simecolon, [nondet]) :-
+    S="[foo bar] ;",
+    phrase(stmt(_), S).
+test(lf_at_the_end_of_stmt, [nondet]) :-
+    S="foo=42;\n",
+    phrase(stmt(_), S).
 :- end_tests(corner_cases).
 
 :- begin_tests(trans).
@@ -277,8 +318,29 @@ test(trans_ex4, [nondet]) :-
     S2="self.photoPickerController = PhotoPickerController.alloc.initWithDelegate(self).autorelease".
 :- end_tests(trans).
 
+:- begin_tests(trans_corner_cases).
+test(spaaaces_and_lf_at_the_end_of_stmt, [nondet]) :-
+    S="foo=42;      \n",
+    phrase(stmt(P), S), trans(P, _).
+test(lf_at_the_end_of_stmt, [nondet]) :-
+    S="foo=42;\n",
+    phrase(stmt(P), S), trans(P, _).
+test(lf_twice_at_the_end_of_stmt, [nondet]) :-
+    S="foo=42;\n\n",
+    phrase(stmt(P), S), trans(P, _).
+:- end_tests(trans_corner_cases).
+
+%% i/o
+
+eat :-
+    read_stream_to_codes(user_input, Buf),
+    writef('*1 %s', [Buf]),
+    phrase(code(P), Buf, Rest),
+    writef('*2 P=%t\nRest=%t\n', [P,Rest]),
+    true.
+
 %% run
 
 repl :- run_tests.
-start :- true.
+start :- prompt(_,''), eat.
 main(_) :- start.
