@@ -316,6 +316,13 @@ test(msg_space_simecolon, [nondet]) :-
 test(lf_at_the_end_of_stmt, [nondet]) :-
     S="foo=42;\n",
     phrase(stmt(_), S).
+test(disallow_spaces_at_the_end_of_exp, [fail]) :-
+    S="foo    ",
+    parse(S, _).
+test(trim_spaces_at_the_end_of_exp_then_parse, [nondet]) :-
+    S="foo    \t\r\n",
+    rtrim(S,S1),
+    parse(S1, _).
 :- end_tests(corner_cases).
 
 :- begin_tests(trans).
@@ -389,6 +396,7 @@ test(trans_ex4, [nondet]) :-
 :- end_tests(trans_as_code_block).
 
 :- begin_tests(trans_corner_cases).
+
 test(spaaaces_and_lf_at_the_end_of_stmt, [nondet]) :-
     S="foo=42;      \n",
     phrase(code(P), S), trans(P, _).
@@ -422,8 +430,9 @@ eat(Buf) :-
     read_stream_to_codes(user_input, Buf).
 
 digest(Buf) :-
-    parse(Buf, P),
-	trans(P, Out),
+    rtrim(Buf, Buf2),
+    parse(Buf2, P),
+    trans(P, Out),
     writef(Out).
 
 process :- eat(X), digest(X).

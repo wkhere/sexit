@@ -5,6 +5,9 @@ important
 + stdin/stdout runner
 + handle multilines and guess lines layout
 + accept multilines as well as expressions from the middle of the line
++ trim ending whitespaces before parsing
+- continuous i/o runner
+- Sublime2 plugin
 - normal function calls
 - normal syntax constructs
 - comments
