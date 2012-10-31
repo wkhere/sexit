@@ -102,6 +102,15 @@ code_list([H|T]) --> stmt(H), code_list(T).
 
 code(code(L)) --> code_list(L).
 
+
+parse(S, P) :-
+	( (S==""; member(59,S)) ->	% 59 is semicolon
+	  phrase(code(P), S)
+	;
+	  phrase(exp(P), S)
+	).
+
+
 %% translator
 
 
@@ -375,13 +384,26 @@ test(lf_twice_at_the_end_of_stmt, [nondet]) :-
     phrase(stmt(P), S), trans(P, _).
 :- end_tests(trans_corner_cases).
 
+:- begin_tests(trans_as_code_or_exp).
+test(trans_exp, [nondet]) :-
+	parse("foo", P),
+	trans(P, "foo").
+test(trans_empty_code_block_gives_empty_string, [nondet]) :-
+	parse("", P),
+	trans(P, "").
+test(trans_ex4, [nondet]) :-
+	ex4(S),
+	parse(S, P), trans(P, S2),
+    S2="self.photoPickerController = PhotoPickerController.alloc.initWithDelegate(self).autorelease\n".
+
+:- end_tests(trans_as_code_or_exp).
 %% i/o
 
 eat(Buf) :-
     read_stream_to_codes(user_input, Buf).
 
 digest(Buf) :-
-    phrase(code(P), Buf),
+    parse(P, Buf),
 	trans(P, Out),
     writef(Out).
 

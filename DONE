@@ -4,7 +4,7 @@ important
 + translate parse tree to ruby
 + stdin/stdout runner
 + handle multilines and guess lines layout
-- accept multilines as well as expressions from the middle of the line
++ accept multilines as well as expressions from the middle of the line
 - normal function calls
 - normal syntax constructs
 - comments
