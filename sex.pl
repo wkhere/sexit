@@ -403,7 +403,7 @@ eat(Buf) :-
     read_stream_to_codes(user_input, Buf).
 
 digest(Buf) :-
-    parse(P, Buf),
+    parse(Buf, P),
 	trans(P, Out),
     writef(Out).
 
