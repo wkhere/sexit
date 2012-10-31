@@ -13,9 +13,12 @@ list_to_dl(S,DL-E) :- append(S,E,DL).
 
 empty_dl(H-T) :- unify_with_occurs_check(H,T).
 
-%% code_list join
-join(_Delim, [H], H).
-join(Delim,  [H|T], Acc) :- join(Delim,T,S), append(H,Delim,S1), append(S1,S,Acc).
+%% join list of code_lists using separator:
+join(_Sep, [H], H).
+join( Sep, [H|T], Acc) :-
+    join(Sep,T,S), append(H,Sep, S1), append(S1,S, Acc).
+
+append_nl(L, Acc) :- append(L, "\n", Acc).
 
 %% lexer
 
