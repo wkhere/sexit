@@ -6,8 +6,8 @@ important
 + handle multilines and guess lines layout
 + accept multilines as well as expressions from the middle of the line
 + trim ending whitespaces before parsing
-- continuous i/o runner
-- Sublime2 plugin
++ Sublime2 plugin
+- error handling (couldn't parse -> return back original buffer or some error text)
 - normal function calls
 - normal syntax constructs
 - comments
@@ -20,3 +20,7 @@ less prio
 - save original lines layout
 - idents as atoms
 - translate to "iolist" and write properly at the postprocessing
+
+rejected
+========
+- continuous i/o runner - doesn't buy us anything
