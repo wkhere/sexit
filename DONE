@@ -8,6 +8,7 @@ important
 + trim ending whitespaces before parsing
 + Sublime2 plugin
 - error handling (couldn't parse -> return back original buffer or some error text)
+- keep original number of newlines at the end
 - normal function calls
 - normal syntax constructs
 - comments
