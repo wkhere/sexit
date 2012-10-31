@@ -1,12 +1,16 @@
 SEXIT
 =====
 Seductively Efficient Xenophilic Intelligent Translator of objective-c to ruby.
+You can use it by hitting a key on a selected region in Sublime2 editor.
 
-prereq
-======
-% brew install swi-prolog
-
-it needs to be 6.x for apply:foldl
+install
+=======
+1. % brew install swi-prolog   # needs to be 6.x for apply:foldl
+2. % make install
+3. have Sublime2
+4. put  { "keys": ["super+q"], "command":"sex" }  into your Sublime key bindings
+5. hit cmd-q
+6. enjoy
 
 
 make targets
