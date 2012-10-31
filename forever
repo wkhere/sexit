@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+# Kqueue-based monitor to trigger commands after source file change.
+# So good to have kqueue api tested in the past on t800! :)
+# See http://wisd.io/rzioj
+# Backported from http://github.com/wisdio/TNT
+# (c) 2012 wisdio SA
+# by Wojtek Kaczmarek frk@wisdio.com
+#
+# Kewl usage:            ./forever make test install  # installs plugin if passed tests
+# 
+# Possible options:      ./forever -1 command..  # runs command on start, on by default
+#                        ./forever -0 command..  # don't run command on start
+#
+#
+# Current behavior is that it ignores newly created files -> requires restart.
+# It also seems to remember another file change while command is running and
+# then triggers another run - quite good!
+#
+# TODO:
+# - it doesn't detect when files were recreated (eg. from git)
+#
+# This impl is better in python as kqueue api comes with the vanilla 
+# mac python - no gems, eggs etc.
+
+import os, select
+from sys import argv
+from glob import glob
+
+run_on_start = True
+
+
+masks = ['*.py', '*.pl']
+#print masks
+files = [x for sublist in [glob(mask) for mask in masks] for x in sublist]
+#print files
+
+
+params = argv[1:]
+if params and params[0].startswith('-'):
+  if params[0] == '-0':
+    run_on_start = False
+  elif params[0] == '-1':
+    run_on_start = True
+  params = params[1:]
+
+cmd = ' '.join(params)
+
+if run_on_start and len(cmd):
+  os.system(cmd)
+
+kq = select.kqueue()
+events = []
+for f in files:
+  fd = os.open(f, os.O_RDONLY)
+  ev = select.kevent(fd,
+    filter=select.KQ_FILTER_VNODE,
+    flags=select.KQ_EV_ADD | select.KQ_EV_ENABLE | select.KQ_EV_CLEAR,
+    fflags=select.KQ_NOTE_WRITE)
+  events.append(ev)
+
+kq.control(events,0)
+
+while True:
+    evs = kq.control([], len(files))
+    #print evs
+    print "* detected change, %s" % \
+      (("running %s" %cmd) if len(cmd) else "but no command given")
+    os.system(cmd)
