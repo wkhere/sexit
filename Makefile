@@ -14,10 +14,10 @@ test:
 repl:
 	$(swidev) -g repl -s sex
 
-install-sublime-plugin:
+install-sublime-plugin: $(target)
 	@echo "installing sex plugin for Sublime2"
-	@cp -a sex.py "${HOME}/Library/Application Support/Sublime Text 2/Packages/User/"
 	@rm -f "${HOME}/Library/Application Support/Sublime Text 2/Packages/User/sex.pyc"
+	@cp -a $(target) sex.py "${HOME}/Library/Application Support/Sublime Text 2/Packages/User/"
 
 install-plugin:	install-sublime-plugin
 

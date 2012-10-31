@@ -5,7 +5,7 @@
 from popen2 import popen2
 from transform import Transformer
 
-SexPath = "$HOME/hack/sexit/sex"
+SexPath = './sex'
 
 def do_sex(s0):
   i,o = popen2(SexPath)
