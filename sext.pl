@@ -376,15 +376,18 @@ test(lf_twice_at_the_end_of_stmt, [nondet]) :-
 
 %% i/o
 
-eat :-
-    read_stream_to_codes(user_input, Buf),
-    writef('*1 %s', [Buf]),
-    phrase(code(P), Buf, Rest),
-    writef('*2 P=%t\nRest=%t\n', [P,Rest]),
-    true.
+eat(Buf) :-
+    read_stream_to_codes(user_input, Buf).
+
+digest(Buf) :-
+    phrase(code(P), Buf),
+	trans(P, Out),
+    writef(Out).
+
+process :- eat(X), digest(X).
 
 %% run
 
 repl :- run_tests.
-start :- prompt(_,''), eat.
+start :- prompt(_,''), process.
 main(_) :- start.
