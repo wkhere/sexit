@@ -435,6 +435,8 @@ digest(Buf) :-
     parse(Buf2, P),
     trans(P, Out),
     writef(Out).
+digest(Buf) :-
+    writef('/* %s NOT SEXY */', [Buf]).
 
 process :- eat(X), digest(X).
 
