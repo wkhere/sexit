@@ -2,6 +2,9 @@ important
 =========
 
 + translate parse tree to ruby
+- normal function calls
+- normal syntax constructs
+- comments
 - super exception
 - tests in separate file (load_test_files/1, use_module/1? ..etc)
 - stdin/stdout runner
