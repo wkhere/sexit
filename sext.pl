@@ -2,7 +2,7 @@
 %%
 %% Seductively Efficient Xenophilic Translator [of objective-c to ruby]
 %% (c) 2012 Wojciech Kaczmarek frk@wisdio.com
-%
+%%
 :- use_module(library(dcg/basics)).
 
 %% util
@@ -62,7 +62,6 @@ meth([H|T]) --> meth_arg(H), blanks1, meth(T).
 
 msg(msg(rcv(X), meth(M))) -->
     "[", exp(X), {X\=[]}, blanks1, meth(M), blanks, "]".
-    
 
 attr_var([X]) --> var(X).
 attr_var([H|T]) --> var(H), ".", attr_var(T).
@@ -86,43 +85,47 @@ foldl_pred_example((N,SV), ([],[]), ([N],[SV])).
 foldl_pred_example((N,SV), ([H1|T1],[H2|T2]), ( [H1|[N|T1]], [H2|[SV|T2]] ) ).
 %% usage: foldl(foldl_pred_example,  [(1,a), (2,b)],  ([],[]),  V).
 
-fold_args((N,SV), "", Acc) :- swritef(Buf, '%s:%s', [N,SV]), string_to_list(Buf, Acc).
-fold_args((N,SV), L0, Acc) :- swritef(Buf, ', %s:%s', [N,SV]), string_to_list(Buf, L1), append(L0,L1, Acc).
+fold_args((N,SV), "", Acc) :-
+    swritef(Buf, '%s:%s', [N,SV]),
+    string_to_list(Buf, Acc).
+fold_args((N,SV), L0, Acc) :-
+    swritef(Buf, ', %s:%s', [N,SV]),
+    string_to_list(Buf, L1), append(L0,L1, Acc).
 
 trans(const(C), S0, SAll) :-
-  C =.. [_Type, V],
-  swritef(S, '%t', [V]), string_to_list(S,L),
-  append(S0, L, SAll).
+    C =.. [_Type, V],
+    swritef(S, '%t', [V]), string_to_list(S,L),
+    append(S0, L, SAll).
 trans(ident(V), S0, SAll) :-
-  append(S0,V,SAll).
+    append(S0,V,SAll).
 trans(attr(L), S0, SAll) :-
-  findall(I, member(ident(I),L), Is),
-  join(".", Is, S),
-  append(S0, S, SAll).
+    findall(I, member(ident(I),L), Is),
+    join(".", Is, S),
+    append(S0, S, SAll).
 
 trans(msg(rcv(Rcv), meth( [arg(name(MethName),noval)] )), S0, SAll) :-
-  %% arity0 case
-  trans(Rcv, "", SRcv),
-  swritef(S, '%s.%s', [SRcv, MethName]),
-  string_to_list(S,L),
-  append(S0, L, SAll).
+    %% arity0 case
+    trans(Rcv, "", SRcv),
+    swritef(S, '%s.%s', [SRcv, MethName]),
+    string_to_list(S,L),
+    append(S0, L, SAll).
 trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
-  %% arity>0 case; please note that while parser currently allows bad objc form where 
-  %% noval method arg is at any position (like "[rcv foo:bar baz]"),
-  %% we do not catch such case here so it will not be translated
-  L=[LH|LT],
-  LH= arg(name(MethName),val(Val1)),
-  trans(Rcv, "", SRcv),
-  trans(Val1, "", SVal1),
-  ( LT==[] ->
-    swritef(S, '%s.%s(%s)', [SRcv, MethName, SVal1])
-  ; 
-    findall((N,SV), (member(arg(name(N),val(V)), LT), trans(V,"",SV)), RestArgs),
-    foldl(fold_args, RestArgs, "", SVals2Plus),
-    swritef(S, '%s.%s(%s, %s)', [SRcv, MethName, SVal1, SVals2Plus])
-  ),
-  string_to_list(S,L1),
-  append(S0, L1, SAll).
+    %% arity>0 case; please note that while parser currently allows bad objc form where 
+    %% noval method arg is at any position (like "[rcv foo:bar baz]"),
+    %% we do not catch such case here so it will not be translated
+    L=[LH|LT],
+    LH= arg(name(MethName),val(Val1)),
+    trans(Rcv, "", SRcv),
+    trans(Val1, "", SVal1),
+    ( LT==[] ->
+      swritef(S, '%s.%s(%s)', [SRcv, MethName, SVal1])
+    ; 
+      findall((N,SV), (member(arg(name(N),val(V)), LT), trans(V,"",SV)), RestArgs),
+      foldl(fold_args, RestArgs, "", SVals2Plus),
+      swritef(S, '%s.%s(%s, %s)', [SRcv, MethName, SVal1, SVals2Plus])
+    ),
+    string_to_list(S,L1),
+    append(S0, L1, SAll).
 
 %% test
 
@@ -198,44 +201,52 @@ test(method_arg_in_parens, [nondet]) :-
     phrase(exp(msg(_, meth([arg(_, val(const(num(42))))]))),
            "[foo quux:(42)]").
 test(method_with_nonzero_arity_should_have_all_args_with_values, [fail, fixme(in_the_future)]) :-
-  phrase(exp(msg(_,_)),
-    "[[obiekt dupa] bla foo: bar xxx]").
+    phrase(exp(msg(_,_)),
+           "[[obiekt dupa] bla foo: bar xxx]").
 :- end_tests(corner_cases).
 
 :- begin_tests(trans).
 test(trans_var, [nondet]) :-
-  S="foo",
-  phrase(exp(P), S), trans(P,"",S).
+    S="foo",
+    phrase(exp(P), S), trans(P,"",S).
 test(trans_int_const, [nondet]) :-
-  S="42", 
-  phrase(exp(P), S), trans(P,"",S).
+    S="42", 
+    phrase(exp(P), S), trans(P,"",S).
 test(trans_attr, [nondet]) :-
-  S="foo.bar.quux", 
-  phrase(exp(P), S), trans(P,"",S).
+    S="foo.bar.quux", 
+    phrase(exp(P), S), trans(P,"",S).
 test(trans_arity0_meth, [nondet]) :-
-  S="[xxx zzz]", 
-  phrase(exp(P), S), trans(P,"", "xxx.zzz").
+    S="[xxx zzz]", 
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="xxx.zzz".
 test(trans_arity0_meth_nested_receiver, [nondet]) :-
-  S="[[xxx yyy] zzz]", 
-  phrase(exp(P), S), trans(P, "", "xxx.yyy.zzz").
+    S="[[xxx yyy] zzz]", 
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="xxx.yyy.zzz".
 test(trans_arity1_meth, [nondet]) :-
-  S="[xxx yyy:42]",
-  phrase(exp(P), S), trans(P,"", "xxx.yyy(42)").
+    S="[xxx yyy:42]",
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="xxx.yyy(42)".
 test(trans_arity1_meth_nested_receiver, [nondet]) :-
-  S="[[xxx yyy] zzz:42]", 
-  phrase(exp(P), S), trans(P, "", "xxx.yyy.zzz(42)").
+    S="[[xxx yyy] zzz:42]", 
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="xxx.yyy.zzz(42)".
 test(trans_arity1_meth_nested_arg, [nondet]) :-
-  S="[xxx yyy:[bar foo]]",
-  phrase(exp(P), S), trans(P,"", "xxx.yyy(bar.foo)").
+    S="[xxx yyy:[bar foo]]",
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="xxx.yyy(bar.foo)".
 test(trans_arity2_meth, [nondet]) :-
-  S="[foo bar:1 baz:2]",
-  phrase(exp(P), S), trans(P,"", "foo.bar(1, baz:2)").
+    S="[foo bar:1 baz:2]",
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="foo.bar(1, baz:2)".
 test(trans_arity2_meth_nested_all_args, [nondet]) :-
-  S="[foo bar:[x y:1] baz:[a b:2]]",
-  phrase(exp(P), S), trans(P,"", "foo.bar(x.y(1), baz:a.b(2))").
+    S="[foo bar:[x y:1] baz:[a b:2]]",
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="foo.bar(x.y(1), baz:a.b(2))".
 test(trans_arity3_meth_nested_all_args, [nondet]) :-
-  S="[foo bar:[x y:1] baz:[a b:2] gdc:[foo x:1]]",
-  phrase(exp(P), S), trans(P,"", "foo.bar(x.y(1), baz:a.b(2), gdc:foo.x(1))").
+    S="[foo bar:[x y:1] baz:[a b:2] gdc:[foo x:1]]",
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="foo.bar(x.y(1), baz:a.b(2), gdc:foo.x(1))".
 :- end_tests(trans).
 
 %% run
