@@ -8,5 +8,8 @@ $(target): *.pl
 run: $(target)
 	./$(target)
 
+test:
+	$(swidev) -t run_tests -s sext
+
 repl:
 	$(swidev) -g repl -s sext

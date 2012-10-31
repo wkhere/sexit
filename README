@@ -10,6 +10,7 @@ make targets
 
 % make          # compiles to exec, entry point: main/1
 % make run      # as above plus runs the exec
+% make test     # loads code, runs tests and exits
 % make repl     # loads code, runs repl/1 hook and stays in the repl
 
 By the way, don't strip exec -- it will purge our code and leave only
