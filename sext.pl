@@ -95,8 +95,11 @@ stmt(asgn(dest(D),val(V))) -->
     attr_var(D), whites, "=", exp(V), sc.
 stmt(S) --> whites1, stmt(S).
 
-code([]) --> [].
-code([H|T]) --> stmt(H), stmt(T).
+code_list([]) --> [].
+code_list([H]) --> stmt(H).
+code_list([H|T]) --> stmt(H), code_list(T).
+
+code(code(L)) --> code_list(L).
 
 %% translator
 
@@ -111,6 +114,12 @@ fold_args((N,SV), "", Acc) :-
 fold_args((N,SV), L0, Acc) :-
     swritef(Buf, ', %s:%s', [N,SV]),
     string_to_list(Buf, L1), append(L0,L1, Acc).
+
+trans(code([]), S0, S0).
+trans(code([H|T]), S0, SAll) :-
+	trans(H, SH),
+	append(S0, SH, S2), append(S2, "\n", S3),
+	trans(code(T), S3, SAll).
 
 trans(const(C), S0, SAll) :-
     C =.. [_Type, V],
@@ -222,6 +231,26 @@ test(two_statements_with_many_lfs, [nondet]) :-
     phrase(code(_), S).
 :- end_tests(many_statements).
 
+:- begin_tests(many_statements_as_code_block).
+
+test(two_statements_without_whitespaces, [nondet]) :-
+    S=" [foo bar]; a=3;",
+    phrase(code(P), S),
+	P=code([_,_]).
+test(two_statements_with_space_between, [nondet]) :-
+    S=" [foo bar]; a=3;",
+    phrase(code(P), S),
+	P=code([_,_]).
+test(two_statements_with_lf_between, [nondet]) :-
+    S=" [foo bar];\na=3;",
+    phrase(code(P), S),
+	P=code([_,_]).
+test(two_statements_with_many_lfs, [nondet]) :-
+    S=" [foo bar];\n\n\n a=3;\n\n",
+    phrase(code(P), S),
+	P=code([_,_]).
+:- end_tests(many_statements_as_code_block).
+
 :- begin_tests(corner_cases).
 
 test(disallow_empty_ident, [fail]) :-
@@ -320,9 +349,22 @@ test(trans_ex4, [nondet]) :-
     S2="self.photoPickerController = PhotoPickerController.alloc.initWithDelegate(self).autorelease".
 :- end_tests(trans).
 
+:- begin_tests(trans_as_code_block).
+test(trans_empty_code_block_gives_empty_string, [nondet]) :-
+	trans(code([]), "").
+test(trans_ex4, [nondet]) :-
+	ex4(S),
+	phrase(code(P), S), trans(P, S2),
+    S2="self.photoPickerController = PhotoPickerController.alloc.initWithDelegate(self).autorelease\n".
+
+:- end_tests(trans_as_code_block).
+
 :- begin_tests(trans_corner_cases).
 test(spaaaces_and_lf_at_the_end_of_stmt, [nondet]) :-
     S="foo=42;      \n",
+    phrase(code(P), S), trans(P, _).
+test(spaaaces_and_crlf_at_the_end_of_stmt, [nondet]) :-
+    S="foo=42;      \r\n",
     phrase(stmt(P), S), trans(P, _).
 test(lf_at_the_end_of_stmt, [nondet]) :-
     S="foo=42;\n",
