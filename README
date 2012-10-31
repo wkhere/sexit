@@ -12,6 +12,7 @@ it needs to be 6.x for apply:foldl
 make targets
 ============
 
+% make install  # compiles & installs as Sublime2 plugin
 % make          # compiles to exec, entry point: main/1
 % make run      # as above plus runs the exec
 % make test     # loads code, runs tests and exits
