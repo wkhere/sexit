@@ -73,7 +73,7 @@ exp(attr(V)) --> attr_var(V).
 exp(V) --> "(", exp(V), ")".
 exp(V) --> blank, blanks, exp(V).
 
-stmt(V) --> msg(V), ";".
+stmt(msg_stmt(V)) --> msg(V), ";".
 stmt(asgn(dest(D),val(V))) -->
     attr_var(D), blanks, "=", exp(V), blanks, ";".
 
@@ -103,6 +103,9 @@ trans(attr(L), S0, SAll) :-
     join(".", Is, S),
     append(S0, S, SAll).
 
+trans(msg_stmt(Msg), S0, SAll) :-
+    trans(Msg, S0, SAll).
+
 trans(msg(rcv(Rcv), meth( [arg(name(MethName),noval)] )), S0, SAll) :-
     %% arity0 case
     trans(Rcv, "", SRcv),
@@ -129,11 +132,12 @@ trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
 
 %% test
 
-:- begin_tests(messages).
 ex1(S) :- S="[Foo alloc]".
 ex2(S) :- S="[[PhotoPickerController alloc] init]".
 ex3(S) :- S="[[[PhotoPickerController alloc] initWithDelegate:self] autorelease];".
 ex4(S) :- S="self.photoPickerController = [[[PhotoPickerController alloc] initWithDelegate:self] autorelease];".
+
+:- begin_tests(messages).
 
 test(arity0_message, [nondet]) :-
     phrase(exp(
@@ -164,7 +168,7 @@ test(message_meth_arg_nesting, [nondet]) :-
            "[foo quux: [bar foo] zzz:[xxx yyy]]").
 test(ex1, [nondet]) :- ex1(S), phrase(exp(msg(_,_)), S).
 test(ex2, [nondet]) :- ex2(S), phrase(exp(msg(_,_)), S).
-test(ex3, [nondet]) :- ex3(S), phrase(stmt(msg(_,_)), S).
+test(ex3, [nondet]) :- ex3(S), phrase(stmt(msg_stmt(msg(_,_))), S).
 test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_)), S).
 :- end_tests(messages).
 
@@ -247,6 +251,18 @@ test(trans_arity3_meth_nested_all_args, [nondet]) :-
     S="[foo bar:[x y:1] baz:[a b:2] gdc:[foo x:1]]",
     phrase(exp(P), S), trans(P,"", S2),
     S2="foo.bar(x.y(1), baz:a.b(2), gdc:foo.x(1))".
+test(trans_ex1, [nondet]) :-
+    ex1(S),
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="Foo.alloc".
+test(trans_ex2, [nondet]) :-
+    ex2(S),
+    phrase(exp(P), S), trans(P,"", S2),
+    S2="PhotoPickerController.alloc.init".
+test(trans_ex3, [nondet]) :-
+    ex3(S),
+    phrase(stmt(P), S), trans(P,"", S2),
+    S2="PhotoPickerController.alloc.initWithDelegate(self).autorelease".
 :- end_tests(trans).
 
 %% run
