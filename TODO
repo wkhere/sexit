@@ -1,3 +1,0 @@
-* super exception
-* translate parse tree to ruby
-* tests in separate file (load_test_files/1, use_module/1? ..etc)
