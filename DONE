@@ -2,12 +2,14 @@ important
 =========
 
 + translate parse tree to ruby
++ stdin/stdout runner
++ handle multilines and guess lines layout
+- accept multilines as well as expressions from the middle of the line
 - normal function calls
 - normal syntax constructs
 - comments
 - super exception
 - tests in separate file (load_test_files/1, use_module/1? ..etc)
-- stdin/stdout runner
 - save original lines layout
 
 
