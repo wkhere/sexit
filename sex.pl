@@ -52,6 +52,7 @@ split_with1(Delimiter, [LastX]) -->
 split_with1(_Delimiter, []) --> [].
 
 const(const(num(V))) --> number(V).
+const(const(str(S))) --> "@", dquote, string_without("\"",S), dquote.
 const(const(str(S))) --> dquote, string_without("\"",S), dquote.
 
 ident_c1(C) --> [C], {code_type(C, alpha)}.
@@ -333,6 +334,12 @@ test(trans_var, [nondet]) :-
 test(trans_int_const, [nondet]) :-
     S="42", 
     phrase(exp(P), S), trans(P,"",S).
+test(trans_str_const, [nondet]) :-
+    S="\"a42\"", 
+    phrase(exp(P), S), trans(P,"",S).
+test(trans_str_const_with_atsign, [nondet]) :-
+    S="@\"a42\"", 
+    phrase(exp(P), S), trans(P,"", "\"a42\"").
 test(trans_attr, [nondet]) :-
     S="foo.bar.quux", 
     phrase(exp(P), S), trans(P,"",S).
