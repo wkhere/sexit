@@ -9,12 +9,11 @@ important
 - normal syntax constructs
 - comments
 - super exception
-- tests in separate file (load_test_files/1, use_module/1? ..etc)
-- save original lines layout
-
 
 less prio
 =========
 
+- tests in separate file (load_test_files/1, use_module/1? ..etc)
+- save original lines layout
 - idents as atoms
 - translate to "iolist" and write properly at the postprocessing
