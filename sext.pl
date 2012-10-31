@@ -52,6 +52,7 @@ ident2([C]) --> ident_c(C).
 ident2([H|T]) --> ident_c(H), ident2(T).
 
 whites1 --> white, whites.
+blanks1 --> blank, blanks.
 
 lpar --> "(", whites.
 rpar --> whites, ")".
@@ -60,6 +61,7 @@ lbracket --> "[", whites.
 rbracket --> whites, "]".
 
 lf --> blanks.
+lf --> whites, "\r\n".
 
 semicolon --> whites, ";", lf, whites.
 semicolon --> whites, ";", whites.
