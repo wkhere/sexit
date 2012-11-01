@@ -10,7 +10,7 @@ important
 + insanely simple error handling when there's no sex (does not parse)
 + @-string literals
 + string literals consisting of a number
-~ letters at the end of num literals
++ letters at the end of num literals
 - bool literals
 - @'Z' literals
 - boxing expressions @(expr)

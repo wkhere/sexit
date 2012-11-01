@@ -51,7 +51,11 @@ split_with1(Delimiter, [LastX]) -->
     string_without(Delimiter,LastX), {LastX\=[]}.
 split_with1(_Delimiter, []) --> [].
 
-%%const(const(num(V))) --> number(V), [.
+
+const(const(num(V))) --> number(V), [Mod],
+    { member(Mod, [0'f, 0'F, 0'u, 0'U, 0'l, 0'L]) }.
+const(const(num(V))) --> number(V), "ll".
+const(const(num(V))) --> number(V), "LL".
 const(const(num(V))) --> number(V).
 const(const(str(S))) --> "@", dquote, string_without("\"",S), dquote.
 const(const(str(S))) --> dquote, string_without("\"",S), dquote.
@@ -215,6 +219,14 @@ test(float_const, [nondet]) :-
     S="42.23", 
     parse(S, P),
     P=const(num(42.23)).
+test(float_const_with_f, [nondet]) :- S="42.5f", parse(S, P), P=const(num(42.5)).
+test(float_const_with_F, [nondet]) :- S="42.5F", parse(S, P), P=const(num(42.5)).
+test(int_const_with_u, [nondet]) :- S="42u", parse(S, P), P=const(num(42)).
+test(int_const_with_U, [nondet]) :- S="42U", parse(S, P), P=const(num(42)).
+test(int_const_with_l, [nondet]) :- S="42l", parse(S, P), P=const(num(42)).
+test(int_const_with_L, [nondet]) :- S="42L", parse(S, P), P=const(num(42)).
+test(int_const_with_ll, [nondet]) :- S="42ll", parse(S, P), P=const(num(42)).
+test(int_const_with_LL, [nondet]) :- S="42ll", parse(S, P), P=const(num(42)).
 test(str_const, [nondet]) :-
     S="\"a42\"", 
     parse(S,P),
