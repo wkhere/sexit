@@ -81,6 +81,7 @@ ident_c1('_') --> "_".
 ident_c(C) --> [C], {code_type(C, alnum)}.
 ident_c('_') --> "_".
 
+ident("nil") --> "NULL".
 ident([C]) --> ident_c1(C).     % this way ident can be '_' - bit ugly
 ident([H|T]) --> ident_c1(H), ident2(T).
 ident2([C]) --> ident_c(C).
@@ -558,7 +559,8 @@ test(trans_fun_arity3_nested, [nondet]) :-
 :- end_tests(trans_funcalls).
 
 :- begin_tests(trans_corner_cases).
-
+test(nil, [nondet]) :-
+    parse("foo(NULL)", P), trans(P, "foo(nil)").
 test(spaaaces_and_lf_at_the_end_of_stmt, [nondet]) :-
     S="foo=42;      \n",
     phrase(code(P), S), trans(P, _).

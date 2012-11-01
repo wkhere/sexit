@@ -31,7 +31,7 @@ important
 - comments
 - ifdefs
 - super exception
-- NULL -> nil
++ NULL -> nil
 
 less prio
 =========
