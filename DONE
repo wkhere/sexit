@@ -32,6 +32,10 @@ important
 - ifdefs
 - super exception
 + NULL -> nil
+- @selector(..) syntax
+  - give me the cases Royal:
+    - action:@selector(fire:)  --> action:'fire'
+    what about other arities?
 
 less prio
 =========
