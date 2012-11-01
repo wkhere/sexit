@@ -67,21 +67,25 @@ semicolon --> whites, ";", lf, whites.
 semicolon --> whites, ";", whites.
 sc --> semicolon.
 
-const(const(num(V))) --> number(V), [Mod],
+const_num(const(num(V))) --> number(V), "ll", !.
+const_num(const(num(V))) --> number(V), "LL", !.
+const_num(const(num(V))) --> number(V), [Mod],
     { member(Mod, [0'f, 0'F, 0'u, 0'U, 0'l, 0'L]) }.
-const(const(num(V))) --> number(V), "ll".
-const(const(num(V))) --> number(V), "LL".
-const(const(num(V))) --> number(V).
-const(const(str(S))) --> "@", dquote, string_without("\"",S), dquote.
-const(const(str(S))) --> dquote, string_without("\"",S), dquote.
+const_num(const(num(V))) --> number(V).
 
-ident_c1(C) --> [C], {code_type(C, alpha)}.
+const_str(const(str(S))) --> "@", dquote, string_without("\"",S), dquote.
+const_str(const(str(S))) --> dquote, string_without("\"",S), dquote.
+
+const(V) --> const_str(V), !.
+const(V) --> const_num(V).
+
 ident_c1('_') --> "_".
+ident_c1(C) --> [C], {code_type(C, alpha)}.
 
-ident_c(C) --> [C], {code_type(C, alnum)}.
 ident_c('_') --> "_".
+ident_c(C) --> [C], {code_type(C, alnum)}.
 
-ident("nil") --> "NULL".
+ident("nil") --> "NULL", !.
 ident([C]) --> ident_c1(C).     % this way ident can be '_' - bit ugly
 ident([H|T]) --> ident_c1(H), ident2(T).
 ident2([C]) --> ident_c(C).
@@ -93,14 +97,14 @@ meth_arg1(arg(name(N),noval)) --> ident(N).
 meth_arg1(X) --> meth_arg(X).
 
 meth_arg(arg(name(N),val(const(str(V))))) -->
-    ident(N), ":@selector(", ident(V), ":)".
+    ident(N), ":@selector(", !, ident(V), ":)".
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", whites, exp(V).
 
 meth([A]) --> meth_arg1(A).
 meth([H|T]) --> meth_arg(H), whites1, meth(T).
 
 msg(msg(rcv(X), meth(M))) -->
-    lbracket, exp(X), {X\=[]}, whites1, meth(M), rbracket.
+    lbracket, !, exp(X), {X\=[]}, whites1, meth(M), rbracket.
 
 
 args([]) --> [].
@@ -108,7 +112,7 @@ args([H]) --> exp(H).
 args([H|T]) --> exp(H), whites, ",", whites, args(T).
 
 funcall(fun(name(F), args(A))) -->
-    ident(F), lpar, args(A), rpar.
+    ident(F), lpar, !, args(A), rpar.
 
 
 type --> ident(_).
@@ -120,22 +124,26 @@ type_decl --> type.
 type_decl --> type_ptr.
 
 
+var(ident(V)) --> ident(V).
+
 attr_var([X]) --> var(X).
 attr_var([H|T]) --> var(H), ".", attr_var(T).
 
 casted_var(V) --> lpar, type_decl, rpar, whites, var(V).
 casted_var(attr(V)) --> lpar, type_decl, rpar, whites, attr_var(V).
 
+attr_exp([X]) --> var(X).
+attr_exp([H|T]) --> exp(H), ".", attr_exp(T).
 
-var(ident(V)) --> ident(V).
 
+exp(V) --> msg(V).
 exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> casted_var(V).
-exp(V) --> msg(V).
 exp(V) --> funcall(V).
 exp(attr(V)) --> attr_var(V).
-exp(V) --> lpar, exp(V), whites, rpar.
+%%exp(attr(V)) --> attr_exp(V). %% BUG, hangs with this
+exp(V) --> lpar, exp(V), rpar.
 exp(V) --> whites1, exp(V).
 
 
@@ -283,6 +291,24 @@ test(trans_str_const_having_only_a_number, [nondet]) :-
     P=const(str("42")).
 :- end_tests(literals).
 
+
+:- begin_tests(determinism).
+test(const_num) :-
+    phrase(const(const(num(42.3))), "42.3").
+test(const_str) :-
+    phrase(const(const(str(_))), "\"42\"").
+test(ident_c) :-
+    forall( member(C, ["_","a","b"]),
+            phrase(ident_c(_), C) ).
+test(ident) :-
+    forall( member(C, ["_aa","aa","aa2", "aa_"]),
+            phrase(ident(_), C) ).
+test(meth_arg1_1, fixme(should_be_det)) :-
+    phrase(meth_arg1(arg(_,noval)), "arg").
+test(meth_arg1_2, fixme(should_be_det)) :-
+    phrase(meth_arg1(arg(_,val(_))), "arg:2").
+:- end_tests(determinism).
+
 :- begin_tests(messages).
 
 test(arity0_message, [nondet]) :-
@@ -328,13 +354,17 @@ test(selector_arity1, [nondet]) :-
 
 :- begin_tests(attrs).
 
-test(attr1, [nondet]) :-
+test(attr_var, [nondet]) :-
     phrase(exp(attr(_)),
            "foo.bar").
-test(attr2, [nondet]) :-
+test(attr_var_nested, [nondet]) :-
     phrase(exp(attr(L)),
            "foo.bar.quux"),
     nth1(2, L, ident("bar")).
+test(attr_exp, [nondet, fixme(wip)]) :-
+    S="[UIColor clearColor].CGColor",
+    parse(S, P),
+    P=attr(msg(_,_), ident("CGColor")).
 :- end_tests(attrs).
 
 :- begin_tests(assignments).
@@ -578,8 +608,10 @@ test(trans_selector_arity1, [nondet]) :-
 :- end_tests(trans_selectors).
 
 :- begin_tests(trans_corner_cases).
-test(nil, [nondet]) :-
-    parse("foo(NULL)", P), trans(P, "foo(nil)").
+test(nil) :-
+    phrase(var(P), "NULL"), trans(P, "nil").
+test(nil_in_funcall, fixme(should_be_det)) :-
+    phrase(funcall(P), "foo(NULL)"), trans(P, "foo(nil)").
 test(spaaaces_and_lf_at_the_end_of_stmt, [nondet]) :-
     S="foo=42;      \n",
     phrase(code(P), S), trans(P, _).

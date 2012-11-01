@@ -35,6 +35,7 @@ important
 - ifdefs
 - super exception
 + NULL -> nil
+- BUG with exp.attr
 - op++ op-- only as statements
 ~ @selector(..) syntax
   - give me the cases Royal:
