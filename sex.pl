@@ -293,7 +293,7 @@ test(count_lspaces_1_only_space) :- count_lspaces(" ", 1).
 test(count_lspaces_5) :- count_lspaces("     foo", 5).
 test(count_lspaces_5_only_spaces) :- count_lspaces("     ", 5).
 test(count_lspaces_is_oneway, [error(instantiation_error)]) :-
-    count_lspaces(" ", I, 1).
+    count_lspaces(" ", _I, 1).
 :- end_tests(utils).
 
 :- begin_tests(literals).
