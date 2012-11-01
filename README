@@ -18,6 +18,7 @@ make targets
 
 % make install  # compiles & installs as Sublime2 plugin
 % make          # compiles to exec, entry point: main/1
+% make verbose  # as above with swipl messages
 % make run      # as above plus runs the exec
 % make test     # loads code, runs tests and exits
 % make repl     # loads code, runs repl/1 hook and stays in the repl

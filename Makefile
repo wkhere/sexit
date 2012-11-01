@@ -3,6 +3,9 @@ swidev=swipl
 swicc=swipl
 
 $(target): *.pl
+	time $(swicc) -q -O --stand_alone=true -o $(target) -g main -c sex
+
+verbose:
 	$(swicc) -O --stand_alone=true -o $(target) -g main -c sex
 
 run: $(target)
