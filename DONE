@@ -16,7 +16,7 @@ important
 + simple var type decls in assign statements
 + ignore casts in values
 + normal function calls
-- code blocks
+= code blocks
 = keep original indentation and put all output lines with it
 - keep original number of newlines at the end
 - method decls
@@ -50,6 +50,7 @@ less prio
 - @property -> outlet or commented outlet
 - @'Z' literals
 - boxing expressions @(expr)
+- arith
 - op++ op-- only as statements
 - tests in separate file (load_test_files/1, use_module/1? ..etc)
 - plugin: when can't find binary it doesn't show any error 
