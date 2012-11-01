@@ -10,6 +10,17 @@ important
 + insanely simple error handling when there's no sex (does not parse)
 + @-string literals
 + string literals consisting of a number
+~ letters at the end of num literals
+- bool literals
+- @'Z' literals
+- boxing expressions @(expr)
+- container exprs:
+  - array @[e1,e2]
+  - dict @{ @"k1": e1, @"k2": e2 }
+- array subscripts
+- enums
+- var decls
+- var type decls in assign statements
 - string literals having \" inside
 - ignore casts in method arguments
 - code blocks
