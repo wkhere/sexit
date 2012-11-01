@@ -89,12 +89,14 @@ ident2([H|T]) --> ident_c(H), ident2(T).
 
 %% parser
 
-meth_arg(arg(name(N),noval)) --> ident(N).
+meth_arg1(arg(name(N),noval)) --> ident(N).
+meth_arg1(X) --> meth_arg(X).
+
 meth_arg(arg(name(N),val(const(str(V))))) -->
     ident(N), ":@selector(", ident(V), ":)".
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", whites, exp(V).
 
-meth([A]) --> meth_arg(A).
+meth([A]) --> meth_arg1(A).
 meth([H|T]) --> meth_arg(H), whites1, meth(T).
 
 msg(msg(rcv(X), meth(M))) -->
@@ -445,7 +447,7 @@ test(allow_blanks_before_exp, [nondet]) :-
 test(method_arg_in_parens, [nondet]) :-
     phrase(exp(msg(_, meth([arg(_, val(const(num(42))))]))),
            "[foo quux:(42)]").
-test(method_with_nonzero_arity_should_have_all_args_with_values, [fail, fixme(in_the_future)]) :-
+test(noval_method_arg_cant_occur_in_the_middle, [fail]) :-
     phrase(exp(msg(_,_)),
            "[[obiekt dupa] bla foo: bar xxx]").
 test(parent_exp_with_white_left, [nondet]) :-
