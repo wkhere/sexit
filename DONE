@@ -1,8 +1,6 @@
 important
 =========
 
-- plugin: when can't find binary it doesn't show any error and reads empty string 
-  which is passed to editor, causing disappearance of the text in region
 + translate parse tree to ruby
 + stdin/stdout runner
 + handle multilines and guess lines layout
@@ -14,59 +12,64 @@ important
 + string literals consisting of a number
 + letters at the end of num literals
 + bool literals YES NO
-- enhanced bool literals @TRUE @FALSE
-- @'Z' literals
-- boxing expressions @(expr)
-~ container exprs:
-  ~ array @[e1,e2]  -- parsed, anyway occurs only twice in Pablo's 
-  - dict @{ @"k1": e1, @"k2": e2 }  -- occurs only twice in Pablo's
-- array subscripts
-- enums
-- ignore var decls
++ NULL -> nil
 + simple var type decls in assign statements
-- string literals having \" inside
 + ignore casts in values
-- @property -> outlet or commented outlet
-- code blocks
-- keep original number of newlines at the end
-~ keep original indentation and put all output lines with it
 + normal function calls
+- code blocks
+= keep original indentation and put all output lines with it
+- keep original number of newlines at the end
+- method decls
+- _variable -> @variable
+
+less prio
+=========
+- remove .autorelease .release with comment to assign nil
+- less nondeterminism
+- BUG with exp.attr when input contains doublequoted semicolon
+- potential BUG with decision on exp vs code_block 
+- super exception
+- ignore var decls
+- array subscripts
+= container exprs:
+  = array @[e1,e2]  -- parsed, anyway occurs only twice in Pablo's 
+  - dict @{ @"k1": e1, @"k2": e2 }  -- occurs only twice in Pablo's
+= @selector(..) syntax
+  - give me the cases Royal:
+    + action:@selector(fire:)  --> action:"fire"
+    what about other arities?
 - flow control
   - if
   - switch - maybe
   -- for - no, better use ruby iteration
 - comments
 - ifdefs
-- super exception
-+ NULL -> nil
-- less nondeterminism
-- BUG with exp.attr
-- remove .autorelease
-- potential BUG with decision on exp vs code_block 
-  when input contains doublequoted semicolon
+- string literals having \" inside
+- enums
+- enhanced bool literals @TRUE @FALSE
+- @property -> outlet or commented outlet
+- @'Z' literals
+- boxing expressions @(expr)
 - op++ op-- only as statements
-~ @selector(..) syntax
-  - give me the cases Royal:
-    + action:@selector(fire:)  --> action:"fire"
-    what about other arities?
-- _variable -> @variable
-
-less prio
-=========
-
 - tests in separate file (load_test_files/1, use_module/1? ..etc)
-- save original lines layout
-- idents as atoms
-- translate to "iolist" and write properly at the postprocessing
+- plugin: when can't find binary it doesn't show any error 
+  and reads empty string  which is passed to editor, causing 
+  disappearance of the text in region
 - messages with variable argument list
+
+maybe
+=====
+- idents as atoms
 
 rejected
 ========
 - continuous i/o runner - doesn't buy us anything
+- save original lines layout
+- translate to "iolist" and write properly at the postprocessing
 
 
 symbols
 =======
 + DONE
 - TODO
-~ WIP
+= WIP
