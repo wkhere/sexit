@@ -42,7 +42,6 @@ important
 - less nondeterminism
 - BUG with exp.attr
 - remove .autorelease
-- remove self from self.attr1.attr2
 - potential BUG with decision on exp vs code_block 
   when input contains doublequoted semicolon
 - op++ op-- only as statements
@@ -63,3 +62,10 @@ less prio
 rejected
 ========
 - continuous i/o runner - doesn't buy us anything
+
+
+symbols
+=======
++ DONE
+- TODO
+~ WIP
