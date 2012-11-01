@@ -8,6 +8,11 @@ important
 + trim ending whitespaces before parsing
 + Sublime2 plugin
 + insanely simple error handling when there's no sex (does not parse)
++ @-string literals
++ string literals consisting of a number
+- string literals having \" inside
+- ignore casts in method arguments
+- code blocks
 - keep original number of newlines at the end
 - normal function calls
 - normal syntax constructs

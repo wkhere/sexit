@@ -146,8 +146,9 @@ trans(code([H|T]), S0, SAll) :-
 	trans(code(T), S3, SAll).
 
 trans(const(C), S0, SAll) :-
-    C =.. [_Type, V],
-    swritef(S, '%t', [V]), string_to_list(S,L),
+    C =.. [Type, V],
+    ( Type==str -> Mod='"%s"'; Mod='%q' ),
+    swritef(S, Mod, [V]), string_to_list(S,L),
     append(S0, L, SAll).
 trans(ident(V), S0, SAll) :-
     append(S0,V,SAll).
@@ -340,6 +341,9 @@ test(trans_str_const, [nondet]) :-
 test(trans_str_const_with_atsign, [nondet]) :-
     S="@\"a42\"", 
     phrase(exp(P), S), trans(P,"", "\"a42\"").
+test(trans_str_const_having_only_a_number, [nondet]) :-
+    S="\"42\"", 
+    phrase(exp(P), S), trans(P,"",S).
 test(trans_attr, [nondet]) :-
     S="foo.bar.quux", 
     phrase(exp(P), S), trans(P,"",S).
