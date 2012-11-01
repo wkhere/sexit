@@ -18,7 +18,7 @@ important
 - @'Z' literals
 - boxing expressions @(expr)
 - container exprs:
-  - array @[e1,e2]
+  ~ array @[e1,e2]
   - dict @{ @"k1": e1, @"k2": e2 }
 - array subscripts
 - enums

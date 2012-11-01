@@ -116,6 +116,8 @@ args([H|T]) --> exp(H), whites, ",", whites, args(T).
 funcall(fun(name(F), args(A))) -->
     ident(F), lpar, !, args(A), rpar.
 
+array(array(Xs)) -->
+    "@", lbracket, args(Xs), whites1, rbracket.
 
 type --> ident(_).
 
@@ -143,6 +145,7 @@ exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> casted_var(V).
 exp(V) --> funcall(V).
+exp(V) --> array(V).
 exp(attr(V)) --> attr_var(V).
 %%exp(attr(V)) --> attr_exp(V). %% BUG, hangs with this
 exp(V) --> lpar, exp(V), rpar.
@@ -570,6 +573,10 @@ test(trans_ex4, [nondet]) :-
     ex4(S),
     phrase(stmt(P), S), trans(P,"", S2),
     S2="self.photoPickerController = PhotoPickerController.alloc.initWithDelegate(self).autorelease".
+test(trans_immutable_array, [nondet, fixme(write_actual_trans)]) :-
+    S="@[ @\"SO_SWEET\", 2 ]",
+    phrase(array(P), S),
+    P=array([_,_]), trans(P, "[\"SO_SWEET\", 2]").
 :- end_tests(trans).
 
 :- begin_tests(trans_as_code_block).
