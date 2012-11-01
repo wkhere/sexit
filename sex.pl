@@ -217,6 +217,19 @@ trans(code([H|T]), S0, SAll) :-
 	append(S0, SH, S2), append(S2, "\n", S3),
 	trans(code(T), S3, SAll).
 
+trans(lambda(args([]), body(C)), L0, Acc) :-
+    append(L0, "(lambda do\n", Header),
+    trans(code(C), Body),
+    append(Header, Body, L1),
+    append(L1, "end)\n", Acc).
+
+trans(lambda(args([A]), body(C)), L0, Acc) :-
+    append(L0, "(lambda do |", H1),
+    append(H1, A, H2), append(H2, "|\n", Header),
+    trans(code(C), Body),
+    append(Header, Body, L1),
+    append(L1, "end)\n", Acc).
+
 trans(const(C), S0, SAll) :-
     C =.. [Type, V],
     ( Type==str -> Mod='"%s"'; Mod='%q' ),
@@ -430,13 +443,17 @@ test(lambda_body, [nondet]) :-
     phrase(lambda_body(P), S),
     P=[asgn(_,_), asgn(_,_)].
 test(lambda_arity0, [nondet]) :-
-    S="^{\r\n\n\n\na=2;\nb=3;\n  }",
+    S="^{\na=2;\nb=3;\n}",
     parse(S, P),
-    P=lambda(args([]), body([asgn(_,_), asgn(_,_)])).
+    P=lambda(args([]), body([asgn(_,_), asgn(_,_)])),
+    trans(P, S2),
+    S2="(lambda do\na = 2\nb = 3\nend)\n".
 test(lambda_arity1, [nondet]) :-
-    S="^(BOOL finished) {\r\n\n\n\na=2;\nb=3;\n  }",
+    S="^(BOOL x) {\na=2;\nb=3;\n}",
     parse(S, P),
-    P=lambda(args([_]), body([asgn(_,_), asgn(_,_)])).
+    P=lambda(args([_]), body([asgn(_,_), asgn(_,_)])),
+    trans(P, S2),
+    S2="(lambda do |x|\na = 2\nb = 3\nend)\n".
 :- end_tests(lambdas).
 
 :- begin_tests(funcalls).

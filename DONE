@@ -16,7 +16,7 @@ important
 + simple var type decls in assign statements
 + ignore casts in values
 + normal function calls
-= code blocks
++ lambdas
 = keep original indentation and put all output lines with it
 - keep original number of newlines at the end
 - method decls
