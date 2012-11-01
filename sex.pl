@@ -51,6 +51,7 @@ split_with1(Delimiter, [LastX]) -->
     string_without(Delimiter,LastX), {LastX\=[]}.
 split_with1(_Delimiter, []) --> [].
 
+%%const(const(num(V))) --> number(V), [.
 const(const(num(V))) --> number(V).
 const(const(str(S))) --> "@", dquote, string_without("\"",S), dquote.
 const(const(str(S))) --> dquote, string_without("\"",S), dquote.
@@ -204,6 +205,29 @@ test(ltrim) :-
 test(rtrim) :-
 	rtrim(" foo \r\t\n \n \r \t", " foo").
 :- end_tests(utils).
+
+:- begin_tests(literals).
+test(int_const, [nondet]) :-
+    S="42", 
+    parse(S, P),
+    P=const(num(42)).
+test(float_const, [nondet]) :-
+    S="42.23", 
+    parse(S, P),
+    P=const(num(42.23)).
+test(str_const, [nondet]) :-
+    S="\"a42\"", 
+    parse(S,P),
+    P=const(str("a42")).
+test(str_const_with_atsign, [nondet]) :-
+    S="@\"a42\"", 
+    parse(S,P),
+    P=const(str("a42")).
+test(trans_str_const_having_only_a_number, [nondet]) :-
+    S="\"42\"", 
+    parse(S,P),
+    P=const(str("42")).
+:- end_tests(literals).
 
 :- begin_tests(messages).
 
