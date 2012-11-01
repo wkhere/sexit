@@ -287,6 +287,13 @@ test(attr2, [nondet]) :-
     nth1(2, L, ident("bar")).
 :- end_tests(attrs).
 
+:- begin_tests(assignments).
+test(asgn_to_attr, [nondet]) :-
+    S="foo.bar = [x y:z];",
+    parse(S, P),
+    P=code([ asgn(dest([ident("foo"),ident("bar")]), val(msg(_,_))) ]).
+:- end_tests(assignments).
+
 :- begin_tests(many_statements).
 test(two_statements, [nondet]) :-
     S=" [foo bar]; a=3;",
