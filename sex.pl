@@ -103,23 +103,30 @@ msg(msg(rcv(X), meth(M))) -->
 attr_var([X]) --> var(X).
 attr_var([H|T]) --> var(H), ".", attr_var(T).
 
+casted_var(V) --> lpar, type_decl, rpar, whites, var(V).
+casted_var(attr(V)) --> lpar, type_decl, rpar, whites, attr_var(V).
+
 exp(V) --> const(V).
 exp(V) --> var(V).
+exp(V) --> casted_var(V).
 exp(V) --> msg(V).
 exp(attr(V)) --> attr_var(V).
 exp(V) --> lpar, exp(V), whites, rpar.
 exp(V) --> whites1, exp(V).
 
 type --> ident(_).
-type_decl --> type, whites1.
-type_decl --> type, whites1, "*", whites.
-type_decl --> type, whites, "*", whites1.
+
+type_ptr --> type, whites1, "*", whites.
+type_ptr --> type, whites, "*", whites1.
+
+type_decl --> type.
+type_decl --> type_ptr.
 
 stmt(msg_stmt(V)) --> msg(V), sc.
 stmt(asgn(dest(D),val(V))) -->
     attr_var(D), whites, "=", exp(V), sc.
 stmt(asgn(dest([D]),val(V))) -->
-    type_decl, var(D), whites, "=", exp(V), sc.
+    type_decl, whites, var(D), whites, "=", exp(V), sc.
 stmt(S) --> whites1, stmt(S).
 
 code_list([]) --> [].
@@ -310,6 +317,23 @@ test(asgn_with_type_pointer_decl, [nondet]) :-
             (parse(S, P),
              P=code([ asgn(dest([ident("bar")]), val(msg(_,_))) ]) )).
 :- end_tests(assignments).
+
+:- begin_tests(casts).
+test(cast_simple, [nondet]) :-
+    S="(id)kCTFontAttributeName",
+    parse(S,P),
+    P=ident("kCTFontAttributeName").
+test(cast_method_args, [nondet]) :-
+    S="[self.attributedString addAttribute:(id)kCTFontAttributeName value:(id)ctFontRef range:range]",
+    parse(S,P),
+    P=msg(_, meth( [arg(name("addAttribute"), val(ident("kCTFontAttributeName"))),
+                    arg(name("value"), val(ident("ctFontRef"))),
+                    _] )).
+test(cast_attr, [nondet]) :-
+    S="(id) foo.bar",
+    parse(S,P),
+    P=attr([_,_]).
+:- end_tests(casts).
 
 :- begin_tests(many_statements).
 test(two_statements, [nondet]) :-
