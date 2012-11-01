@@ -49,6 +49,7 @@ important
   - give me the cases Royal:
     + action:@selector(fire:)  --> action:"fire"
     what about other arities?
+- _variable -> @variable
 
 less prio
 =========
