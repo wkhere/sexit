@@ -27,11 +27,15 @@ important
 - keep original number of newlines at the end
 - keep original indentation and put all output lines with it
 + normal function calls
-- normal syntax constructs
+- flow control
+  - if
+  - switch - maybe
+  -- for - no, better use ruby iteration
 - comments
 - ifdefs
 - super exception
 + NULL -> nil
+- op++ op-- only as statements
 ~ @selector(..) syntax
   - give me the cases Royal:
     + action:@selector(fire:)  --> action:"fire"
