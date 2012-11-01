@@ -146,12 +146,25 @@ casted_var(attr(V)) --> lpar, type_decl, rpar, whites, attr_var(V).
 attr_exp([X]) --> var(X).
 attr_exp([H|T]) --> exp(H), ".", attr_exp(T).
 
+lambda_args([]) --> [].
+lambda_args([H]) --> ident(_Type), whites1, ident(H).
+%%lambda_args([H|T]) --> lambda_args(H), whites, ",", whites, lambda_args(T).
+%% above line is only a guess how lambdas with arity>1 would look in obj-c
+
+lambda_body(L) -->
+    "{", blanks, code_list(L), blanks, "}".
+lambda(lambda(args([]), body(V))) -->
+    "^", whites, lambda_body(V).
+lambda(lambda(args(A), body(V))) -->
+    "^", lpar, whites, lambda_args(A), whites, rpar, whites, lambda_body(V).
+
 
 exp(V) --> msg(V).
 exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> casted_var(V).
 exp(V) --> funcall(V).
+exp(V) --> lambda(V).
 exp(V) --> array(V).
 exp(attr(V)) --> attr_var(V).
 %%exp(attr(V)) --> attr_exp(V). %% BUG, hangs with this
@@ -172,11 +185,14 @@ code_list([H|T]) --> stmt(H), code_list(T).
 
 code(code(L)) --> code_list(L).
 
+guess_stmt(S) :-
+    S==""; member(59,S), not(ltrim(S, [94|_])).
+%% 59 is semicolon, 94 is caret
+%% very crude heuristics ;)
 
 parse(S, P) :-
-	( (S==""; member(59,S)) ->	% 59 is semicolon
-	  phrase(code(P), S)
-	;
+	( guess_stmt(S) ->
+	  phrase(code(P), S);
 	  phrase(exp(P), S)
 	).
 
@@ -403,6 +419,25 @@ test(asgn_with_type_pointer_decl, [nondet]) :-
             (parse(S, P),
              P=code([ asgn(dest([ident("bar")]), val(msg(_,_))) ]) )).
 :- end_tests(assignments).
+
+:- begin_tests(lambdas).
+test(lambda_arg1, [nondet]) :-
+    S="BOOL finished",
+    phrase(lambda_args(P), S),
+    P=[_].
+test(lambda_body, [nondet]) :-
+    S="{\r\n\n\n\na=2;\nb=3;\n  }",
+    phrase(lambda_body(P), S),
+    P=[asgn(_,_), asgn(_,_)].
+test(lambda_arity0, [nondet]) :-
+    S="^{\r\n\n\n\na=2;\nb=3;\n  }",
+    parse(S, P),
+    P=lambda(args([]), body([asgn(_,_), asgn(_,_)])).
+test(lambda_arity1, [nondet]) :-
+    S="^(BOOL finished) {\r\n\n\n\na=2;\nb=3;\n  }",
+    parse(S, P),
+    P=lambda(args([_]), body([asgn(_,_), asgn(_,_)])).
+:- end_tests(lambdas).
 
 :- begin_tests(funcalls).
 test(fun_arity0, [nondet]) :-
