@@ -13,7 +13,7 @@ important
 + @-string literals
 + string literals consisting of a number
 + letters at the end of num literals
-- bool literals YES NO
++ bool literals YES NO
 - enhanced bool literals @TRUE @FALSE
 - @'Z' literals
 - boxing expressions @(expr)

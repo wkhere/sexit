@@ -86,6 +86,8 @@ ident_c('_') --> "_".
 ident_c(C) --> [C], {code_type(C, alnum)}.
 
 ident("nil") --> "NULL", !.
+ident("true") --> "YES", !.
+ident("false") --> "NO", !.
 ident([C]) --> ident_c1(C).     % this way ident can be '_' - bit ugly
 ident([H|T]) --> ident_c1(H), ident2(T).
 ident2([C]) --> ident_c(C).
@@ -612,6 +614,12 @@ test(nil) :-
     phrase(var(P), "NULL"), trans(P, "nil").
 test(nil_in_funcall, fixme(should_be_det)) :-
     phrase(funcall(P), "foo(NULL)"), trans(P, "foo(nil)").
+test(yes) :-
+    %% if the whole exp were det, the following line could be written
+    %% using parse/2 and still be det
+    phrase(var(P), "YES"), trans(P, "true").
+test(no) :-
+    phrase(var(P), "NO"), trans(P, "false").
 test(spaaaces_and_lf_at_the_end_of_stmt, [nondet]) :-
     S="foo=42;      \n",
     phrase(code(P), S), trans(P, _).
