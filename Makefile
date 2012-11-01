@@ -17,7 +17,7 @@ repl:
 install-sublime-plugin: $(target)
 	@echo "installing sex plugin for Sublime2"
 	@rm -f "${HOME}/Library/Application Support/Sublime Text 2/Packages/User/sex.pyc"
-	@cp -a $(target) sex.py "${HOME}/Library/Application Support/Sublime Text 2/Packages/User/"
+	@cp $(target) sex.py "${HOME}/Library/Application Support/Sublime Text 2/Packages/User/"
 
 install-plugin:	install-sublime-plugin
 
