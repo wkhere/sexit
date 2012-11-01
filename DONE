@@ -1,6 +1,8 @@
 important
 =========
 
+- plugin: when can't find binary it doesn't show any error and reads empty string 
+  which is passed to editor, causing disappearance of the text in region
 + translate parse tree to ruby
 + stdin/stdout runner
 + handle multilines and guess lines layout
