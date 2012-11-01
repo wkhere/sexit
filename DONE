@@ -41,7 +41,10 @@ important
 + NULL -> nil
 - less nondeterminism
 - BUG with exp.attr
-- potential BUG with decision on exp vs code_block when input contains doublequoted doublequote
+- remove .autorelease
+- remove self from self.attr1.attr2
+- potential BUG with decision on exp vs code_block 
+  when input contains doublequoted semicolon
 - op++ op-- only as statements
 ~ @selector(..) syntax
   - give me the cases Royal:
