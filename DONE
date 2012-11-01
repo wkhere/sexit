@@ -17,6 +17,7 @@ important
 + ignore casts in values
 + normal function calls
 + lambdas
++ allow += -= assignments
 = keep original indentation and put all output lines with it
 - keep original number of newlines at the end
 - method decls

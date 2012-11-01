@@ -171,12 +171,15 @@ exp(attr(V)) --> attr_var(V).
 exp(V) --> lpar, exp(V), rpar.
 exp(V) --> whites1, exp(V).
 
+asgn_op("=")  --> "=".
+asgn_op("+=") --> "+=".
+asgn_op("-=") --> "-=".
 
 stmt(msg_stmt(V)) --> msg(V), sc.
-stmt(asgn(dest(D),val(V))) -->
-    attr_var(D), whites, "=", exp(V), sc.
-stmt(asgn(dest([D]),val(V))) -->
-    type_decl, whites, var(D), whites, "=", exp(V), sc.
+stmt(asgn(dest(D), op(O), val(V))) -->
+    attr_var(D), whites, asgn_op(O), exp(V), sc.
+stmt(asgn(dest([D]), op(O), val(V))) -->
+    type_decl, whites, var(D), whites, asgn_op(O), exp(V), sc.
 stmt(S) --> whites1, stmt(S).
 
 code_list([]) --> [].
@@ -242,10 +245,11 @@ trans(attr(L), S0, SAll) :-
     join(".", Is, S),
     append(S0, S, SAll).
 
-trans(asgn(dest(D), val(V)), L0, Acc) :-
-    trans(attr(D), "", LD),
-    trans(V, "", LV),
-    append(L0, LD, L1), append(L1, " = ", L2), append(L2, LV, Acc).
+trans(asgn(dest(D), op(O), val(V)), L0, Acc) :-
+    trans(attr(D), LD),
+    trans(V, LV),
+    append([32|O], " ", Op),
+    append(L0, LD, L1), append(L1, Op, L2), append(L2, LV, Acc).
 
 trans(msg_stmt(Msg), S0, SAll) :-
     trans(Msg, S0, SAll).
@@ -390,7 +394,7 @@ test(message_meth_arg_nesting, [nondet]) :-
 test(ex1, [nondet]) :- ex1(S), phrase(exp(msg(_,_)), S).
 test(ex2, [nondet]) :- ex2(S), phrase(exp(msg(_,_)), S).
 test(ex3, [nondet]) :- ex3(S), phrase(stmt(msg_stmt(msg(_,_))), S).
-test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_)), S).
+test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_,_)), S).
 :- end_tests(messages).
 
 
@@ -420,17 +424,17 @@ test(attr_exp, [nondet, fixme(wip)]) :-
 test(asgn_to_attr, [nondet]) :-
     S="foo.bar = [x y:z];",
     parse(S, P),
-    P=code([ asgn(dest([ident("foo"),ident("bar")]), val(msg(_,_))) ]).
+    P=code([ asgn(dest([ident("foo"),ident("bar")]), op("="), val(msg(_,_))) ]).
 test(asgn_with_type_decl, [nondet]) :-
     S="UIView bar = [x y:z];",
     parse(S, P),
-    P=code([ asgn(dest([ident("bar")]), val(msg(_,_))) ]).
+    P=code([ asgn(dest([ident("bar")]), op("="), val(msg(_,_))) ]).
 test(asgn_with_type_pointer_decl, [nondet]) :-
     foreach(member(S,
                    ["UIView *bar = [x y:z];", "UIView* bar = [x y:z];"
                     ]),
             (parse(S, P),
-             P=code([ asgn(dest([ident("bar")]), val(msg(_,_))) ]) )).
+             P=code([ asgn(dest([ident("bar")]), op("="), val(msg(_,_))) ]) )).
 :- end_tests(assignments).
 
 :- begin_tests(lambdas).
@@ -441,17 +445,17 @@ test(lambda_arg1, [nondet]) :-
 test(lambda_body, [nondet]) :-
     S="{\r\n\n\n\na=2;\nb=3;\n  }",
     phrase(lambda_body(P), S),
-    P=[asgn(_,_), asgn(_,_)].
+    P=[asgn(_,_,_), asgn(_,_,_)].
 test(lambda_arity0, [nondet]) :-
     S="^{\na=2;\nb=3;\n}",
     parse(S, P),
-    P=lambda(args([]), body([asgn(_,_), asgn(_,_)])),
+    P=lambda(args([]), body([asgn(_,_,_), asgn(_,_,_)])),
     trans(P, S2),
     S2="(lambda do\na = 2\nb = 3\nend)\n".
 test(lambda_arity1, [nondet]) :-
     S="^(BOOL x) {\na=2;\nb=3;\n}",
     parse(S, P),
-    P=lambda(args([_]), body([asgn(_,_), asgn(_,_)])),
+    P=lambda(args([_]), body([asgn(_,_,_), asgn(_,_,_)])),
     trans(P, S2),
     S2="(lambda do |x|\na = 2\nb = 3\nend)\n".
 :- end_tests(lambdas).
