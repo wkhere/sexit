@@ -24,3 +24,9 @@ make targets
 
 By the way, don't strip exec -- it will purge our code and leave only
 the swipl kernel.
+
+
+references
+==========
+
+http://clang.llvm.org/docs/ObjectiveCLiterals.html
