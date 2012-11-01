@@ -22,6 +22,13 @@ join( Sep, [H|T], Acc) :-
 
 append_nl(L, Acc) :- append(L, "\n", Acc).
 
+count_lspaces(L, N) :- count_lspaces(L,0, N).
+count_lspaces([], N, N).
+count_lspaces([32|T], I, N) :- !,
+    I1 is I+1,
+    count_lspaces(T, I1, N).
+count_lspaces([_|_], N, N).
+
 ltrim([], []).
 ltrim([H|T], Acc) :-
 	( code_type(H, space) ->
@@ -263,6 +270,14 @@ test(ltrim) :-
 	ltrim("\r\t\n \n \r \t foo ", "foo ").
 test(rtrim) :-
 	rtrim(" foo \r\t\n \n \r \t", " foo").
+test(count_lspaces_empty) :- count_lspaces("", 0).
+test(count_lspaces_0) :- count_lspaces("foo", 0).
+test(count_lspaces_1) :- count_lspaces(" foo", 1).
+test(count_lspaces_1_only_space) :- count_lspaces(" ", 1).
+test(count_lspaces_5) :- count_lspaces("     foo", 5).
+test(count_lspaces_5_only_spaces) :- count_lspaces("     ", 5).
+test(count_lspaces_is_oneway, [error(instantiation_error)]) :-
+    count_lspaces(" ", I, 1).
 :- end_tests(utils).
 
 :- begin_tests(literals).

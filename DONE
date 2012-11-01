@@ -29,7 +29,7 @@ important
 - @property -> outlet or commented outlet
 - code blocks
 - keep original number of newlines at the end
-- keep original indentation and put all output lines with it
+~ keep original indentation and put all output lines with it
 + normal function calls
 - flow control
   - if
