@@ -90,6 +90,7 @@ ident2([H|T]) --> ident_c(H), ident2(T).
 %% parser
 
 meth_arg(arg(name(N),noval)) --> ident(N).
+meth_arg(arg(name(N),val(V))) --> ident(N), ":@selector(", ident(V), ":)".
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", whites, exp(V).
 
 meth([A]) --> meth_arg(A).
@@ -313,6 +314,14 @@ test(ex2, [nondet]) :- ex2(S), phrase(exp(msg(_,_)), S).
 test(ex3, [nondet]) :- ex3(S), phrase(stmt(msg_stmt(msg(_,_))), S).
 test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_)), S).
 :- end_tests(messages).
+
+
+:- begin_tests(selectors).
+test(selector_arity1, [nondet]) :-
+    S="[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)]",
+    parse(S, P).
+    P=msg(rcv(_), meth([ _, arg(name("action"), val(const(str("handleTapGesture")))) ])).
+:- end_tests(selectors).
 
 :- begin_tests(attrs).
 
