@@ -26,6 +26,7 @@ important
 + simple var type decls in assign statements
 - string literals having \" inside
 + ignore casts in values
+- @property -> outlet or commented outlet
 - code blocks
 - keep original number of newlines at the end
 - keep original indentation and put all output lines with it
