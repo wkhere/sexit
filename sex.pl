@@ -36,8 +36,6 @@ rtrim(S, S2) :-
 
 %% lexer
 
-dquote --> "\"".
-
 eat(C, [C|Xs]) --> C, eat(C, Xs).
 eat(C, [C]) --> C.
 
@@ -51,6 +49,23 @@ split_with1(Delimiter, [LastX]) -->
     string_without(Delimiter,LastX), {LastX\=[]}.
 split_with1(_Delimiter, []) --> [].
 
+dquote --> "\"".
+
+lpar --> "(", whites.
+rpar --> whites, ")".
+
+lbracket --> "[", whites.
+rbracket --> whites, "]".
+
+whites1 --> white, whites.
+blanks1 --> blank, blanks.
+
+lf --> blanks.
+lf --> whites, "\r\n".
+
+semicolon --> whites, ";", lf, whites.
+semicolon --> whites, ";", whites.
+sc --> semicolon.
 
 const(const(num(V))) --> number(V), [Mod],
     { member(Mod, [0'f, 0'F, 0'u, 0'U, 0'l, 0'L]) }.
@@ -71,25 +86,7 @@ ident([H|T]) --> ident_c1(H), ident2(T).
 ident2([C]) --> ident_c(C).
 ident2([H|T]) --> ident_c(H), ident2(T).
 
-whites1 --> white, whites.
-blanks1 --> blank, blanks.
-
-lpar --> "(", whites.
-rpar --> whites, ")".
-
-lbracket --> "[", whites.
-rbracket --> whites, "]".
-
-lf --> blanks.
-lf --> whites, "\r\n".
-
-semicolon --> whites, ";", lf, whites.
-semicolon --> whites, ";", whites.
-sc --> semicolon.
-
 %% parser
-
-var(ident(V)) --> ident(V).
 
 meth_arg(arg(name(N),noval)) --> ident(N).
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", whites, exp(V).
@@ -100,11 +97,6 @@ meth([H|T]) --> meth_arg(H), whites1, meth(T).
 msg(msg(rcv(X), meth(M))) -->
     lbracket, exp(X), {X\=[]}, whites1, meth(M), rbracket.
 
-attr_var([X]) --> var(X).
-attr_var([H|T]) --> var(H), ".", attr_var(T).
-
-casted_var(V) --> lpar, type_decl, rpar, whites, var(V).
-casted_var(attr(V)) --> lpar, type_decl, rpar, whites, attr_var(V).
 
 args([]) --> [].
 args([H]) --> exp(H).
@@ -112,6 +104,25 @@ args([H|T]) --> exp(H), whites, ",", whites, args(T).
 
 funcall(fun(name(F), args(A))) -->
     ident(F), lpar, args(A), rpar.
+
+
+type --> ident(_).
+
+type_ptr --> type, whites1, "*", whites.
+type_ptr --> type, whites, "*", whites1.
+
+type_decl --> type.
+type_decl --> type_ptr.
+
+
+attr_var([X]) --> var(X).
+attr_var([H|T]) --> var(H), ".", attr_var(T).
+
+casted_var(V) --> lpar, type_decl, rpar, whites, var(V).
+casted_var(attr(V)) --> lpar, type_decl, rpar, whites, attr_var(V).
+
+
+var(ident(V)) --> ident(V).
 
 exp(V) --> const(V).
 exp(V) --> var(V).
@@ -122,13 +133,6 @@ exp(attr(V)) --> attr_var(V).
 exp(V) --> lpar, exp(V), whites, rpar.
 exp(V) --> whites1, exp(V).
 
-type --> ident(_).
-
-type_ptr --> type, whites1, "*", whites.
-type_ptr --> type, whites, "*", whites1.
-
-type_decl --> type.
-type_decl --> type_ptr.
 
 stmt(msg_stmt(V)) --> msg(V), sc.
 stmt(asgn(dest(D),val(V))) -->
@@ -159,10 +163,10 @@ foldl_pred_example((N,SV), ([],[]), ([N],[SV])).
 foldl_pred_example((N,SV), ([H1|T1],[H2|T2]), ( [H1|[N|T1]], [H2|[SV|T2]] ) ).
 %% usage: foldl(foldl_pred_example,  [(1,a), (2,b)],  ([],[]),  V).
 
-fold_args((N,SV), "", Acc) :-
+fold_msg_args((N,SV), "", Acc) :-
     swritef(Buf, '%s:%s', [N,SV]),
     string_to_list(Buf, Acc).
-fold_args((N,SV), L0, Acc) :-
+fold_msg_args((N,SV), L0, Acc) :-
     swritef(Buf, ', %s:%s', [N,SV]),
     string_to_list(Buf, L1), append(L0,L1, Acc).
 
@@ -210,7 +214,7 @@ trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
       swritef(S, '%s.%s(%s)', [SRcv, MethName, SVal1])
     ; 
       findall((N,SV), (member(arg(name(N),val(V)), LT), trans(V,"",SV)), RestArgs),
-      foldl(fold_args, RestArgs, "", SVals2Plus),
+      foldl(fold_msg_args, RestArgs, "", SVals2Plus),
       swritef(S, '%s.%s(%s, %s)', [SRcv, MethName, SVal1, SVals2Plus])
     ),
     string_to_list(S,L1),
