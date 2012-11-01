@@ -19,7 +19,7 @@ important
   - dict @{ @"k1": e1, @"k2": e2 }
 - array subscripts
 - enums
-- var decls
+- ignore var decls
 + simple var type decls in assign statements
 - string literals having \" inside
 + ignore casts in values
