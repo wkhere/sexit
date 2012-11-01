@@ -90,7 +90,8 @@ ident2([H|T]) --> ident_c(H), ident2(T).
 %% parser
 
 meth_arg(arg(name(N),noval)) --> ident(N).
-meth_arg(arg(name(N),val(V))) --> ident(N), ":@selector(", ident(V), ":)".
+meth_arg(arg(name(N),val(const(str(V))))) -->
+    ident(N), ":@selector(", ident(V), ":)".
 meth_arg(arg(name(N),val(V))) --> ident(N), ":", whites, exp(V).
 
 meth([A]) --> meth_arg(A).
@@ -319,7 +320,7 @@ test(ex4, [nondet]) :- ex4(S), phrase(stmt(asgn(_,_)), S).
 :- begin_tests(selectors).
 test(selector_arity1, [nondet]) :-
     S="[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)]",
-    parse(S, P).
+    parse(S, P),
     P=msg(rcv(_), meth([ _, arg(name("action"), val(const(str("handleTapGesture")))) ])).
 :- end_tests(selectors).
 
@@ -566,6 +567,13 @@ test(trans_fun_arity3_nested, [nondet]) :-
     S="foo(41, baz(10), bar)",
     parse(S, P), trans(P, S).
 :- end_tests(trans_funcalls).
+
+:- begin_tests(trans_selectors).
+test(trans_selector_arity1, [nondet]) :-
+    S="[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)]",
+    parse(S, P), trans(P, S2),
+    S2="UITapGestureRecognizer.alloc.initWithTarget(self, action:\"handleTapGesture\")".
+:- end_tests(trans_selectors).
 
 :- begin_tests(trans_corner_cases).
 test(nil, [nondet]) :-
