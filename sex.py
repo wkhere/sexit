@@ -22,4 +22,4 @@ class SexCommand(Transformer):
   transformer = do_sex,
 
 # put something like this into your user keymap:
-# { "keys": ["super+q"], "command":"sex" }
+# { "keys": ["shift+ctrl+q"], "command":"sex" }
