@@ -106,10 +106,18 @@ attr_var([H|T]) --> var(H), ".", attr_var(T).
 casted_var(V) --> lpar, type_decl, rpar, whites, var(V).
 casted_var(attr(V)) --> lpar, type_decl, rpar, whites, attr_var(V).
 
+args([]) --> [].
+args([H]) --> exp(H).
+args([H|T]) --> exp(H), whites, ",", whites, args(T).
+
+funcall(fun(name(F), args(A))) -->
+    ident(F), lpar, args(A), rpar.
+
 exp(V) --> const(V).
 exp(V) --> var(V).
 exp(V) --> casted_var(V).
 exp(V) --> msg(V).
+exp(V) --> funcall(V).
 exp(attr(V)) --> attr_var(V).
 exp(V) --> lpar, exp(V), whites, rpar.
 exp(V) --> whites1, exp(V).
@@ -207,6 +215,17 @@ trans(msg(rcv(Rcv), meth(L)), S0, SAll) :-
     ),
     string_to_list(S,L1),
     append(S0, L1, SAll).
+
+trans(fun(name(N), args([])), L0, Acc) :-
+    append(N,"()",F),
+    append(L0, F, Acc).
+trans(fun(name(N), args(Args)), L0, Acc) :-
+    append(N, "(", F1),
+    findall(LV,  (member(A, Args), trans(A, LV)),  LVs),
+    join(", ", LVs, L),
+    append(F1, L, F2),
+    append(F2, ")", F),
+    append(L0, F, Acc).
 
 trans(ParseTree, Acc) :- trans(ParseTree, "", Acc).
 
@@ -317,6 +336,29 @@ test(asgn_with_type_pointer_decl, [nondet]) :-
             (parse(S, P),
              P=code([ asgn(dest([ident("bar")]), val(msg(_,_))) ]) )).
 :- end_tests(assignments).
+
+:- begin_tests(funcalls).
+test(fun_arity0, [nondet]) :-
+    S="foo()",
+    parse(S, P),
+    P=fun(name("foo"), args([])).
+test(fun_arity1, [nondet]) :-
+    S="foo(42)",
+    parse(S, P),
+    P=fun(name("foo"), args([const(num(42))])).
+test(fun_arity1_nested_with_msg, [nondet]) :-
+    S="foo([x y:3])",
+    parse(S, P),
+    P=fun(name("foo"), args([ msg(rcv(_), meth([arg(name("y"), val(_))])) ])).
+test(fun_arity2_simple, [nondet]) :-
+    S="foo(41, bar)",
+    parse(S, P),
+    P=fun(name("foo"), args([ const(_), ident(_) ])).
+test(fun_arity3_nested, [nondet]) :-
+    S="foo(41, baz(10), bar)",
+    parse(S, P),
+    P=fun(name("foo"), args([ const(_), fun(name("baz"), args([const(_)])), ident(_) ])).
+:- end_tests(funcalls).
 
 :- begin_tests(casts).
 test(cast_simple, [nondet]) :-
@@ -491,6 +533,26 @@ test(trans_ex4, [nondet]) :-
 
 :- end_tests(trans_as_code_block).
 
+:- begin_tests(trans_funcalls).
+test(trans_fun_arity0, [nondet]) :-
+    S="foo()",
+    parse(S, P), trans(P, S).
+test(trans_fun_arity1, [nondet]) :-
+    S="foo(42)",
+    parse(S, P),
+    trans(P, S).
+test(trans_fun_arity1_nested_with_msg, [nondet]) :-
+    S="foo([x y:3])",
+    parse(S, P), trans(P, S2),
+    S2="foo(x.y(3))".
+test(trans_fun_arity2_simple, [nondet]) :-
+    S="foo(41, bar)",
+    parse(S, P), trans(P, S).
+test(trans_fun_arity3_nested, [nondet]) :-
+    S="foo(41, baz(10), bar)",
+    parse(S, P), trans(P, S).
+:- end_tests(trans_funcalls).
+
 :- begin_tests(trans_corner_cases).
 
 test(spaaaces_and_lf_at_the_end_of_stmt, [nondet]) :-
@@ -520,6 +582,7 @@ test(trans_ex4, [nondet]) :-
     S2="self.photoPickerController = PhotoPickerController.alloc.initWithDelegate(self).autorelease\n".
 
 :- end_tests(trans_as_code_or_exp).
+
 %% i/o
 
 eat(Buf) :-
