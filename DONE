@@ -20,7 +20,7 @@ important
 - array subscripts
 - enums
 - var decls
-- var type decls in assign statements
++ simple var type decls in assign statements
 - string literals having \" inside
 - ignore casts in method arguments
 - code blocks

@@ -110,9 +110,16 @@ exp(attr(V)) --> attr_var(V).
 exp(V) --> lpar, exp(V), whites, rpar.
 exp(V) --> whites1, exp(V).
 
+type --> ident(_).
+type_decl --> type, whites1.
+type_decl --> type, whites1, "*", whites.
+type_decl --> type, whites, "*", whites1.
+
 stmt(msg_stmt(V)) --> msg(V), sc.
 stmt(asgn(dest(D),val(V))) -->
     attr_var(D), whites, "=", exp(V), sc.
+stmt(asgn(dest([D]),val(V))) -->
+    type_decl, var(D), whites, "=", exp(V), sc.
 stmt(S) --> whites1, stmt(S).
 
 code_list([]) --> [].
@@ -292,6 +299,16 @@ test(asgn_to_attr, [nondet]) :-
     S="foo.bar = [x y:z];",
     parse(S, P),
     P=code([ asgn(dest([ident("foo"),ident("bar")]), val(msg(_,_))) ]).
+test(asgn_with_type_decl, [nondet]) :-
+    S="UIView bar = [x y:z];",
+    parse(S, P),
+    P=code([ asgn(dest([ident("bar")]), val(msg(_,_))) ]).
+test(asgn_with_type_pointer_decl, [nondet]) :-
+    foreach(member(S,
+                   ["UIView *bar = [x y:z];", "UIView* bar = [x y:z];"
+                    ]),
+            (parse(S, P),
+             P=code([ asgn(dest([ident("bar")]), val(msg(_,_))) ]) )).
 :- end_tests(assignments).
 
 :- begin_tests(many_statements).
