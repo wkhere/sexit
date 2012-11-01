@@ -17,9 +17,9 @@ important
 - enhanced bool literals @TRUE @FALSE
 - @'Z' literals
 - boxing expressions @(expr)
-- container exprs:
-  ~ array @[e1,e2]
-  - dict @{ @"k1": e1, @"k2": e2 }
+~ container exprs:
+  ~ array @[e1,e2]  -- parsed, anyway occurs only twice in Pablo's 
+  - dict @{ @"k1": e1, @"k2": e2 }  -- occurs only twice in Pablo's
 - array subscripts
 - enums
 - ignore var decls
