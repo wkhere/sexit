@@ -8,8 +8,9 @@ install
 1. % brew install swi-prolog   # needs to be 6.x for apply:foldl
 2. % make install
 3. have Sublime2
-4. put  { "keys": ["super+q"], "command":"sex" }  into your Sublime key bindings
-5. hit cmd-q
+4. put  { "keys": ["shift+ctrl+q"], "command":"sex" }  
+   into your Sublime key bindings (Preferences -> Key Bindings - User)
+5. select code region and hit your key combination
 6. enjoy
 
 
