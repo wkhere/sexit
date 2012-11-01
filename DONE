@@ -25,10 +25,13 @@ important
 - ignore casts in method arguments
 - code blocks
 - keep original number of newlines at the end
+- keep original indentation and put all output lines with it
 - normal function calls
 - normal syntax constructs
 - comments
+- ifdefs
 - super exception
+- NULL -> nil
 
 less prio
 =========
