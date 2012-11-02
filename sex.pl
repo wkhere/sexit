@@ -17,10 +17,8 @@ empty_dl(H-T) :- unify_with_occurs_check(H,T).
 
 %% join list of code_lists using separator:
 join(_Sep, [H], H).
-join( Sep, [H|T], Acc) :-
-    join(Sep,T,S), append(H,Sep, S1), append(S1,S, Acc).
-
-append_nl(L, Acc) :- append(L, "\n", Acc).
+join( Sep, [H|T], S) :-
+    join(Sep,T, S2), append(H,Sep, S1), append(S1,S2, S).
 
 count_lspaces(L, N) :- count_lspaces(L,0, N).
 count_lspaces([], N, N).
@@ -30,15 +28,15 @@ count_lspaces([32|T], I, N) :- !,
 count_lspaces([_|_], N, N).
 
 ltrim([], []).
-ltrim([H|T], Acc) :-
+ltrim([H|T], Res) :-
 	( code_type(H, space) ->
-	  ltrim(T, Acc)
-	; Acc=[H|T] ).
+	  ltrim(T, Res)
+	; Res=[H|T] ).
 
-rtrim(S, S2) :-
-	reverse(S, R),
+rtrim(S0, S) :-
+	reverse(S0, R),
 	ltrim(R, R2),
-	reverse(R2, S2).
+	reverse(R2, S).
 	
 
 %% lexer
