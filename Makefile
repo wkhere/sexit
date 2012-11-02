@@ -25,3 +25,7 @@ install-sublime-plugin: $(target)
 install-plugin:	install-sublime-plugin
 
 install:	install-plugin
+
+forever:
+	@wget https://raw.github.com/herenowcoder/forever/master/forever -O forever
+	@chmod a+x forever
