@@ -1,6 +1,5 @@
 # Sublime2 plugin for SEXIT
-# (c) 2012 wisdio SA
-# by Wojciech Kaczmarek frk@wisdio.com
+# (c) 2012 Wojciech Kaczmarek <wojtekk@kofeina.net>
 
 from os import environ
 from popen2 import popen2

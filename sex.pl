@@ -2,8 +2,7 @@
 %%
 %% Seductively Efficient Xenophilic Intelligent Translator
 %% of objective-c to ruby
-%% (c) 2012 wisdio SA
-%% by Wojciech Kaczmarek frk@wisdio.com
+%% (c) 2012 Wojciech Kaczmarek <wojtekk@kofeina.net>
 
 :- use_module(library(dcg/basics)).
 
